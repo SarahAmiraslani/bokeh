@@ -22,6 +22,7 @@ import {BaseText} from "../text/base_text"
 import {build_view, IterViews} from "core/build_views"
 import {unreachable} from "core/util/assert"
 import {isString} from "core/util/types"
+import {BBox} from "core/util/bbox"
 import {parse_delimited_string} from "models/text/utils"
 
 const {abs} = Math
@@ -46,6 +47,10 @@ export class AxisView extends GuideRendererView {
 
   panel: Panel
   layout: Layoutable
+
+  get bbox(): BBox {
+    return this.layout.bbox
+  }
 
   /*private*/ _axis_label_view: BaseTextView | null = null
   /*private*/ _major_label_views: Map<string | number, BaseTextView> = new Map()
