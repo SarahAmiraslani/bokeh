@@ -7,6 +7,7 @@ working with geographical data using WMTSTileSource in Bokeh.
     :keywords: tile source
 
 '''
+
 from bokeh.document import Document
 from bokeh.embed import file_html
 from bokeh.models import (BoxZoomTool, PanTool, Plot, Range1d,
@@ -19,8 +20,7 @@ x_range = Range1d(start=-200000, end=2000000)
 y_range = Range1d(start=800000, end=7000000)
 
 # create tile source from templated url
-tile_options = {}
-tile_options['url'] = 'http://c.tile.openstreetmap.org/{z}/{x}/{y}.png'
+tile_options = {'url': 'http://c.tile.openstreetmap.org/{z}/{x}/{y}.png'}
 tile_source = WMTSTileSource(**tile_options)
 
 # instantiate plot and add tile source

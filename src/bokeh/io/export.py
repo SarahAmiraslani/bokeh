@@ -410,8 +410,9 @@ def _log_console(driver: WebDriver) -> None:
         logs = driver.get_log('browser')
     except Exception:
         return
-    messages = [ log.get("message") for log in logs if log.get('level') in levels ]
-    if len(messages) > 0:
+    if messages := [
+        log.get("message") for log in logs if log.get('level') in levels
+    ]:
         log.warning("There were browser warnings and/or errors that may have affected your export")
         for message in messages:
             log.warning(message)

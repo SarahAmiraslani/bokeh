@@ -90,10 +90,8 @@ def bounce(sequence: Sequence[int]) -> partial[Callable[[], None]]:
     N = len(sequence)
     def f(i: int) -> int:
         div, mod = divmod(i, N)
-        if div % 2 == 0:
-            return sequence[mod]
-        else:
-            return sequence[N-mod-1]
+        return sequence[mod] if div % 2 == 0 else sequence[N-mod-1]
+
     return partial(force, sequence=_advance(f))
 
 def cosine(w: float, A: float = 1, phi: float = 0, offset: float = 0) -> partial[Callable[[], None]]:

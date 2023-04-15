@@ -34,9 +34,7 @@ class System:
         envstr = " ".join(f"{k}={v}" for k, v in kw.items()) + min(len(kw), 1) * " "
         LOG.record(shell(f"{envstr}{cmd}"))
 
-        env = dict(os.environ)
-        env.update(kw)
-
+        env = os.environ | kw
         if self.dry_run:
             return ""
 

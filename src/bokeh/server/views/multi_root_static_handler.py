@@ -62,11 +62,14 @@ class MultiRootStaticHandler(StaticFileHandler):
             raise HTTPError(404)
 
     def validate_absolute_path(self, root: str, absolute_path: str) -> str | None:
-        for name, artifacts_dir in root.items():
-            if absolute_path.startswith(artifacts_dir):
-                return super().validate_absolute_path(artifacts_dir, absolute_path)
-
-        return None
+        return next(
+            (
+                super().validate_absolute_path(artifacts_dir, absolute_path)
+                for name, artifacts_dir in root.items()
+                if absolute_path.startswith(artifacts_dir)
+            ),
+            None,
+        )
 
 #-----------------------------------------------------------------------------
 # Private API

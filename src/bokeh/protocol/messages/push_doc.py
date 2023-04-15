@@ -70,8 +70,7 @@ class push_doc(Message[PushDoc]):
         header = cls.create_header()
         content = PushDoc(doc=document.to_json())
 
-        msg = cls(header, metadata, content)
-        return msg
+        return cls(header, metadata, content)
 
     def push_to_document(self, doc: Document) -> None:
         '''

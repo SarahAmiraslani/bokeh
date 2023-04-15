@@ -82,10 +82,8 @@ class BokehServerContext(ServerContext):
     @property
     def sessions(self) -> list[ServerSession]:
         result: list[ServerSession] = []
-        context = self.application_context
-        if context:
-            for session in context.sessions:
-                result.append(session)
+        if context := self.application_context:
+            result.extend(iter(context.sessions))
         return result
 
 class BokehSessionContext(SessionContext):
@@ -117,11 +115,7 @@ class BokehSessionContext(SessionContext):
 
     @property
     def destroyed(self) -> bool:
-        if self._session is None:
-            # this means we are in on_session_created
-            return False
-        else:
-            return self._session.destroyed
+        return False if self._session is None else self._session.destroyed
 
     @property
     def logout_url(self) -> str | None:
@@ -261,10 +255,9 @@ class ApplicationContext:
 
     def get_session(self, session_id: ID) -> ServerSession:
         if session_id in self._sessions:
-            session = self._sessions[session_id]
-            return session
+            return self._sessions[session_id]
         else:
-            raise ProtocolError("No such session " + session_id)
+            raise ProtocolError(f"No such session {session_id}")
 
     async def _discard_session(self, session: ServerSession, should_discard: Callable[[ServerSession], bool]) -> None:
         if session.connection_count > 0:
@@ -303,16 +296,17 @@ class ApplicationContext:
     async def _cleanup_sessions(self, unused_session_linger_milliseconds: int) -> None:
         def should_discard_ignoring_block(session: ServerSession) -> bool:
             return session.connection_count == 0 and \
-                (session.milliseconds_since_last_unsubscribe > unused_session_linger_milliseconds or \
-                 session.expiration_requested)
+                    (session.milliseconds_since_last_unsubscribe > unused_session_linger_milliseconds or \
+                     session.expiration_requested)
+
         # build a temp list to avoid trouble from self._sessions changes
         to_discard: list[ServerSession] = []
         for session in self._sessions.values():
             if should_discard_ignoring_block(session) and not session.expiration_blocked:
                 to_discard.append(session)
 
-        if len(to_discard) > 0:
-            log.debug("Scheduling %s sessions to discard" % len(to_discard))
+        if to_discard:
+            log.debug(f"Scheduling {len(to_discard)} sessions to discard")
         # asynchronously reconsider each session
         for session in to_discard:
             if should_discard_ignoring_block(session) and not session.expiration_blocked:

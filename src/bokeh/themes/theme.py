@@ -197,7 +197,7 @@ class Theme:
         from ..models.glyphs import Glyph
         if issubclass(cls, Glyph):
             if hasattr(cls, "line_alpha"):
-                props.update(self._line_defaults)
+                props |= self._line_defaults
             if hasattr(cls, "fill_alpha"):
                 props.update(self._fill_defaults)
             if hasattr(cls, "text_alpha"):
@@ -212,8 +212,8 @@ class Theme:
                 if not issubclass(base, HasProps):
                     continue
                 self._add_glyph_defaults(base, combined)
-                combined.update(attrs.get(base.__name__, _empty_dict))
-            if len(combined) == 0:
+                combined |= attrs.get(base.__name__, _empty_dict)
+            if not combined:
                 combined = _empty_dict
             self._by_class_cache[cls.__name__] = combined
         return self._by_class_cache[cls.__name__]

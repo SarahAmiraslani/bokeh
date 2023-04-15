@@ -164,11 +164,7 @@ class CodeHandler(Handler):
         ''' The last path component for the basename of the configured filename.
 
         '''
-        if self.failed:
-            return None
-
-        # TODO should fix invalid URL characters
-        return '/' + splitext(basename(self._runner.path))[0]
+        return None if self.failed else f'/{splitext(basename(self._runner.path))[0]}'
 
     # Private methods ---------------------------------------------------------
 

@@ -15,7 +15,7 @@ p = figure(width=600, height=600, x_range=(0, 10), y_range=(0, 10))
 def get_text(prefix=''):
     if prefix:
         prefix = r"\text{" + prefix + r"}: "
-    return r"$$" + prefix + r"\frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$$"
+    return f"$${prefix}" + r"\frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$$"
 
 # Default text.
 text = get_text()

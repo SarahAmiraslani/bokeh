@@ -78,7 +78,7 @@ def tab_in_leading(s: str) -> bool:
     return check.expandtabs() != check
 
 def use_tab_rule(fname: str) -> bool:
-    return not (basename(fname) == 'Makefile' or splitext(fname)[1] == '.bat')
+    return basename(fname) != 'Makefile' and splitext(fname)[1] != '.bat'
 
 exclude_paths = ("docs/CHANGELOG",)
 

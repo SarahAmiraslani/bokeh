@@ -55,7 +55,7 @@ def envset(value: Mapping[str, str]|None=None, **kw: Any) -> Iterator[None]:
     yield
     # take care to keep the same actual dict object
     os.environ.clear()
-    os.environ.update(old)
+    os.environ |= old
 
 #-----------------------------------------------------------------------------
 # Dev API

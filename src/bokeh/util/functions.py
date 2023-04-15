@@ -60,8 +60,9 @@ def get_param_info(sig: Signature) -> tuple[list[str], list[Any]]:
         tuple(list, list) : parameters with defaults
 
     '''
-    defaults = []
-    for param in sig.parameters.values():
-        if param.default is not param.empty:
-            defaults.append(param.default)
-    return [name for name in sig.parameters], defaults
+    defaults = [
+        param.default
+        for param in sig.parameters.values()
+        if param.default is not param.empty
+    ]
+    return list(sig.parameters), defaults

@@ -173,7 +173,7 @@ def _show_file_with_state(obj: UIElement, state: State, new: BrowserTarget, cont
 
     '''
     filename = save(obj, state=state)
-    controller.open("file://" + filename, new=NEW_PARAM[new])
+    controller.open(f"file://{filename}", new=NEW_PARAM[new])
 
 def _show_with_state(obj: UIElement, state: State, browser: str | None,
         new: BrowserTarget, notebook_handle: bool = False) -> CommsHandle | None:

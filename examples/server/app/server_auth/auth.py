@@ -37,15 +37,12 @@ class LoginHandler(RequestHandler):
         # !!! intended for "real" use. A real app should use these APIs
         # !!! to connect Oauth or some other established auth workflow.
         # !!!
-        if username == "bokeh" and password == "bokeh":
-            return True
-        return False
+        return username == "bokeh" and password == "bokeh"
 
     def post(self):
         username = self.get_argument("username", "")
         password = self.get_argument("password", "")
-        auth = self.check_permission(username, password)
-        if auth:
+        if auth := self.check_permission(username, password):
             self.set_current_user(username)
             self.redirect("/")
         else:

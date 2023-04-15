@@ -164,7 +164,7 @@ class Event:
 
     @classmethod
     def from_serializable(cls, rep: EventRep, decoder: Deserializer) -> Event:
-        if not ("name" in rep and "values" in rep):
+        if "name" not in rep or "values" not in rep:
             decoder.error("invalid representation")
 
         name = rep.get("name")
@@ -179,9 +179,7 @@ class Event:
             decoder.error(f"can't resolve event '{name}'")
 
         decoded_values = decoder.decode(values)
-        event = cls(**decoded_values)
-
-        return event
+        return cls(**decoded_values)
 
 
 class DocumentEvent(Event):

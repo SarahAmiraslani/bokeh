@@ -190,7 +190,6 @@ def match(obj: Model, selector: SelectorType) -> bool:
                 # otherwise just check the type of the object against val
                 elif not isinstance(obj, val): return False
 
-            # special case 'tag'
             elif key == 'tags':
                 if isinstance(val, str):
                     if val not in obj.tags: return False
@@ -200,23 +199,18 @@ def match(obj: Model, selector: SelectorType) -> bool:
                     except TypeError:
                         if val not in obj.tags: return False
 
-            # if the object doesn't have the attr, it doesn't match
             elif not hasattr(obj, key): return False
-
-            # if the value to check is a dict, recurse
             else:
                 attr = getattr(obj, key)
-                if isinstance(val, dict):
-                    if not match(attr, val): return False
-
-                else:
-                    if attr != val: return False
-
-        # test OR conditionals
+                if (
+                    isinstance(val, dict)
+                    and not match(attr, val)
+                    or not isinstance(val, dict)
+                    and attr != val
+                ): return False
         elif key is OR:
             if not _or(obj, val): return False
 
-        # test operands
         elif key in _operators:
             if not _operators[key](obj, val): return False
 

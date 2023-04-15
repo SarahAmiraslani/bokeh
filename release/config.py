@@ -97,6 +97,4 @@ class Config:
     @property
     def milestone_version(self) -> str:
         major, minor, patch = self.base_version_tuple
-        if patch == "0":
-            return f"{major}.{minor}"
-        return self.base_version
+        return f"{major}.{minor}" if patch == "0" else self.base_version

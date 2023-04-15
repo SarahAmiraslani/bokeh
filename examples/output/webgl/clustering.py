@@ -3,6 +3,7 @@
 http://scikit-learn.org/stable/auto_examples/cluster/plot_cluster_comparison.html
 
 '''
+
 import numpy as np
 from sklearn import cluster, datasets
 from sklearn.preprocessing import StandardScaler
@@ -21,7 +22,7 @@ centers = [(-2, 3), (2, 3), (-2, -3), (2, -3)]
 blobs1 = datasets.make_blobs(centers=centers, n_samples=N, cluster_std=0.4, random_state=8)
 blobs2 = datasets.make_blobs(centers=centers, n_samples=N, cluster_std=0.7, random_state=8)
 
-colors = np.array([x for x in ('#00f', '#0f0', '#f00', '#0ff', '#f0f', '#ff0')])
+colors = np.array(['#00f', '#0f0', '#f00', '#0ff', '#f0f', '#ff0'])
 colors = np.hstack([colors] * 20)
 
 # create clustering algorithms

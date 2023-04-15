@@ -281,10 +281,7 @@ class ColumnDataSource(ColumnarDataSource):
 
         tmp_data = {c: v.values for c, v in _df.items()}
 
-        new_data: DataDict = {}
-        for k, v in tmp_data.items():
-            new_data[k] = v
-
+        new_data: DataDict = dict(tmp_data)
         return new_data
 
     @staticmethod
@@ -664,10 +661,10 @@ class ColumnDataSource(ColumnarDataSource):
         For a more comprehensive example, see :bokeh-tree:`examples/server/app/patch_app.py`.
 
         '''
-        extra = set(patches.keys()) - set(self.data.keys())
-
-        if extra:
-            raise ValueError("Can only patch existing columns (extra: %s)" % ", ".join(sorted(extra)))
+        if extra := set(patches.keys()) - set(self.data.keys()):
+            raise ValueError(
+                f'Can only patch existing columns (extra: {", ".join(sorted(extra))})'
+            )
 
         for name, patch in patches.items():
 
@@ -680,13 +677,11 @@ class ColumnDataSource(ColumnarDataSource):
                     if ind > col_len or ind < 0:
                         raise ValueError("Out-of bounds index (%d) in patch for column: %s" % (ind, name))
 
-                # slice index, patch multiple values of 1d column
                 elif isinstance(ind, slice):
                     _check_slice(ind)
                     if ind.stop is not None and ind.stop > col_len:
                         raise ValueError("Out-of bounds slice index stop (%d) in patch for column: %s" % (ind.stop, name))
 
-                # multi-index, patch sub-regions of "n-d" column
                 elif isinstance(ind, (list, tuple)):
                     if len(ind) == 0:
                         raise ValueError("Empty (length zero) patch multi-index")
@@ -696,7 +691,7 @@ class ColumnDataSource(ColumnarDataSource):
 
                     ind_0 = ind[0]
                     if not isinstance(ind_0, int):
-                        raise ValueError("Initial patch sub-index may only be integer, got: %s" % ind_0)
+                        raise ValueError(f"Initial patch sub-index may only be integer, got: {ind_0}")
 
                     if ind_0 > col_len or ind_0 < 0:
                         raise ValueError("Out-of bounds initial sub-index (%d) in patch for column: %s" % (ind, name))
@@ -715,12 +710,12 @@ class ColumnDataSource(ColumnarDataSource):
                     # Note: bounds of sub-indices after the first are not checked!
                     for subind in ind[1:]:
                         if not isinstance(subind, (int, slice)):
-                            raise ValueError("Invalid patch sub-index: %s" % subind)
+                            raise ValueError(f"Invalid patch sub-index: {subind}")
                         if isinstance(subind, slice):
                             _check_slice(subind)
 
                 else:
-                    raise ValueError("Invalid patch index: %s" % ind)
+                    raise ValueError(f"Invalid patch index: {ind}")
 
         self.data._patch(self.document, self, patches, setter)
 
@@ -764,7 +759,7 @@ class CDSView(Model):
     @filters.setter
     def filters(self, filters: list[Filter]) -> None:
         deprecated("CDSView.filters was deprecated in bokeh 3.0. Use CDSView.filter instead.")
-        if len(filters) == 0:
+        if not filters:
             self.filter = AllIndices()
         elif len(filters) == 1:
             self.filter = filters[0]
@@ -910,11 +905,13 @@ class AjaxDataSource(WebDataSource):
 
 def _check_slice(s: slice) -> None:
     if (s.start is not None and s.stop is not None and s.start > s.stop):
-        raise ValueError("Patch slices must have start < end, got %s" % s)
+        raise ValueError(f"Patch slices must have start < end, got {s}")
     if (s.start is not None and s.start < 0) or \
        (s.stop  is not None and s.stop < 0) or \
        (s.step  is not None and s.step < 0):
-        raise ValueError("Patch slices must have non-negative (start, stop, step) values, got %s" % s)
+        raise ValueError(
+            f"Patch slices must have non-negative (start, stop, step) values, got {s}"
+        )
 
 #-----------------------------------------------------------------------------
 # Code

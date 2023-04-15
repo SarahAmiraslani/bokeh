@@ -11,6 +11,7 @@ the state and its umemployment rate is shown.
 
 .. _US_States Dataset: https://docs.bokeh.org/en/latest/docs/reference/sampledata.html#module-bokeh.sampledata.us_states
 '''
+
 from bokeh.core.properties import field
 from bokeh.models import ColorBar, HoverTool, IndexFilter, LinearColorMapper
 from bokeh.palettes import Viridis11
@@ -44,7 +45,7 @@ r = p.patches(
     fill_color=field("rate", color_mapper),
 )
 
-r.data_source.data["code"] = [ code for code in states ]
+r.data_source.data["code"] = list(states)
 r.data_source.data["rate"] = [ january_2021[code] for code in states ]
 
 HI_i = list(states.keys()).index("HI")

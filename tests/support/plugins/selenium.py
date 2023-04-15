@@ -122,8 +122,8 @@ def has_no_console_errors(pytestconfig: config.Config) -> Callable[[WebDriver], 
             severe_errors = [x for x in logs if x.get('level') == 'SEVERE']
             non_network_errors = [l for l in severe_errors if l.get('type') != 'network']
 
-            if len(non_network_errors) == 0:
-                if len(severe_errors) != 0:
+            if not non_network_errors:
+                if severe_errors:
                     warn(f"There were severe network errors (this may or may not have affected your test): {severe_errors}")
                 return True
 

@@ -304,9 +304,8 @@ class Serializer:
     def _encode_int(self, obj: int) -> AnyRep:
         if -_MAX_SAFE_INT < obj <= _MAX_SAFE_INT:
             return obj
-        else:
-            warn("out of range integer may result in loss of precision", BokehUserWarning)
-            return self._encode_float(float(obj))
+        warn("out of range integer may result in loss of precision", BokehUserWarning)
+        return self._encode_float(float(obj))
 
     def _encode_float(self, obj: float) -> NumberRep | float:
         if isnan(obj):
@@ -323,22 +322,27 @@ class Serializer:
         return [self.encode(item) for item in obj]
 
     def _encode_set(self, obj: set[Any]) -> SetRep:
-        if len(obj) == 0:
-            return SetRep(type="set")
-        else:
-            return SetRep(
+        return (
+            SetRep(
                 type="set",
                 entries=[self.encode(entry) for entry in obj],
             )
+            if obj
+            else SetRep(type="set")
+        )
 
     def _encode_dict(self, obj: dict[Any, Any]) -> MapRep:
-        if len(obj) == 0:
-            return MapRep(type="map")
-        else:
-            return MapRep(
+        return (
+            MapRep(
                 type="map",
-                entries=[(self.encode(key), self.encode(val)) for key, val in obj.items()],
+                entries=[
+                    (self.encode(key), self.encode(val))
+                    for key, val in obj.items()
+                ],
             )
+            if obj
+            else MapRep(type="map")
+        )
 
     def _encode_dataclass(self, obj: Any) -> ObjectRep:
         cls = type(obj)
@@ -351,8 +355,7 @@ class Serializer:
             name=f"{module}.{name}",
         )
 
-        attributes = list(entries(obj))
-        if attributes:
+        if attributes := list(entries(obj)):
             rep["attributes"] = {key: self.encode(val) for key, val in attributes}
 
         return rep
@@ -706,12 +709,11 @@ class Deserializer:
                 return cls
             else:
                 self.error(f"object of type '{type}' is not a subclass of 'Model'")
+        elif type == "Figure":
+            from ..plotting import figure
+            return figure # XXX: helps with push_session(); this needs a better resolution scheme
         else:
-            if type == "Figure":
-                from ..plotting import figure
-                return figure # XXX: helps with push_session(); this needs a better resolution scheme
-            else:
-                self.error(f"can't resolve type '{type}'")
+            self.error(f"can't resolve type '{type}'")
 
     def error(self, message: str) -> NoReturn:
         raise DeserializationError(message)

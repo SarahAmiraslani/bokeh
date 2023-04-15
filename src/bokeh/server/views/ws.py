@@ -112,14 +112,12 @@ class WSHandler(AuthRequestHandler, WebSocketHandler):
         if settings.allowed_ws_origin():
             allowed_hosts = set(settings.allowed_ws_origin())
 
-        allowed = check_allowlist(origin_host, allowed_hosts)
-        if allowed:
+        if allowed := check_allowlist(origin_host, allowed_hosts):
             return True
-        else:
-            log.error("Refusing websocket connection from Origin '%s'; \
+        log.error("Refusing websocket connection from Origin '%s'; \
                       use --allow-websocket-origin=%s or set BOKEH_ALLOW_WS_ORIGIN=%s to permit this; currently we allow origins %r",
-                      origin, origin_host, origin_host, allowed_hosts)
-            return False
+                  origin, origin_host, origin_host, allowed_hosts)
+        return False
 
     @web.authenticated
     def open(self) -> None:
@@ -165,7 +163,7 @@ class WSHandler(AuthRequestHandler, WebSocketHandler):
     def select_subprotocol(self, subprotocols: list[str]) -> str | None:
         log.debug('Subprotocol header received')
         log.trace('Supplied subprotocol headers: %r', subprotocols)
-        if not len(subprotocols) == 2:
+        if len(subprotocols) != 2:
             return None
         self._token = subprotocols[1]
         return subprotocols[0]
@@ -311,8 +309,7 @@ class WSHandler(AuthRequestHandler, WebSocketHandler):
     async def _receive(self, fragment: str | bytes) -> Message[Any] | None:
         # Receive fragments until a complete message is assembled
         try:
-            message = await self.receiver.consume(fragment)
-            return message
+            return await self.receiver.consume(fragment)
         except (MessageError, ProtocolError, ValidationError) as e:
             self._protocol_error(str(e))
             return None
@@ -320,8 +317,7 @@ class WSHandler(AuthRequestHandler, WebSocketHandler):
     async def _handle(self, message: Message[Any]) -> Any | None:
         # Handle the message, possibly resulting in work to do
         try:
-            work = await self.handler.handle(message, self.connection)
-            return work
+            return await self.handler.handle(message, self.connection)
         except (MessageError, ProtocolError, ValidationError) as e: # TODO (other exceptions?)
             self._internal_error(str(e))
             return None

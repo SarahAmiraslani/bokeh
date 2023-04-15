@@ -310,11 +310,7 @@ class DirectoryHandler(Handler):
         configured directory.
 
         '''
-        if self.failed:
-            return None
-        else:
-            # TODO should fix invalid URL characters
-            return '/' + basename(self._path)
+        return None if self.failed else f'/{basename(self._path)}'
 
 #-----------------------------------------------------------------------------
 # Private API

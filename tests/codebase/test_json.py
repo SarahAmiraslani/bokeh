@@ -47,7 +47,7 @@ def test_json() -> None:
             except Exception as e:
                 bad.append(f"{path}: {e}" )
 
-    assert len(bad) == 0, "Malformed JSON detected:\n" + ",".join(bad)
+    assert not bad, "Malformed JSON detected:\n" + ",".join(bad)
 
 #-----------------------------------------------------------------------------
 # Support

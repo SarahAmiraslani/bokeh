@@ -57,7 +57,7 @@ def update_package(version):
     hashes = compute_hashes_for_paths(paths, version)
 
     new = {version: hashes}
-    new.update(current)
+    new |= current
 
     write_package_json(new)
 

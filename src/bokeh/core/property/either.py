@@ -97,7 +97,11 @@ class Either(ParameterizedProperty[Any]):
         if any(param.is_valid(value) for param in self.type_params):
             return
 
-        msg = "" if not detail else f"expected an element of either {nice_join([ str(param) for param in self.type_params ])}, got {value!r}"
+        msg = (
+            f"expected an element of either {nice_join([str(param) for param in self.type_params])}, got {value!r}"
+            if detail
+            else ""
+        )
         raise ValueError(msg)
 
     def wrap(self, value):
@@ -108,9 +112,8 @@ class Either(ParameterizedProperty[Any]):
     def replace(self, old: type[Property[Any]], new: Property[Any]) -> Property[Any]:
         if self.__class__ == old:
             return new
-        else:
-            params = [ type_param.replace(old, new) for type_param in self.type_params ]
-            return Either(*params)
+        params = [ type_param.replace(old, new) for type_param in self.type_params ]
+        return Either(*params)
 
 #-----------------------------------------------------------------------------
 # Dev API

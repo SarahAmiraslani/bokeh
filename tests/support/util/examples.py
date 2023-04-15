@@ -116,7 +116,7 @@ class Example:
 
     @property
     def img_path(self) -> str:
-        return self.path_no_ext + ".png"
+        return f"{self.path_no_ext}.png"
 
     @property
     def is_file(self) -> bool:
@@ -170,8 +170,8 @@ def add_examples(list_of_examples: list[Example], path: str, examples_dir: str, 
         elif name.endswith(".ipynb"):
             flags |= Flags.notebook
         elif isdir(join(example_path, name)):
-            if exists(join(example_path, name, name + ".py")):
-                name = join(name, name + ".py")
+            if exists(join(example_path, name, f"{name}.py")):
+                name = join(name, f"{name}.py")
                 flags |= example_type if example_type else Flags.file
             elif exists(join(example_path, name, "main.py")):
                 # name is unchanged and passed as the example name

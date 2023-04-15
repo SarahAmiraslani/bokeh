@@ -236,10 +236,7 @@ class DataSpec(Either):
             pass
 
         # Check for data source field name
-        if isinstance(val, str):
-            return Field(val)
-
-        return val
+        return Field(val) if isinstance(val, str) else val
 
 class IntSpec(DataSpec):
     def __init__(self, default, *, help: str | None = None) -> None:
@@ -334,10 +331,13 @@ class FontSizeSpec(DataSpec):
         # validations makes m.font_size = "" or m.font_size = "6" an error
         super().validate(value, detail)
 
-        if isinstance(value, str):
-            if len(value) == 0 or value[0].isdigit() and not FontSize._font_size_re.match(value):
-                msg = "" if not detail else f"{value!r} is not a valid font size value"
-                raise ValueError(msg)
+        if isinstance(value, str) and (
+            len(value) == 0
+            or value[0].isdigit()
+            and not FontSize._font_size_re.match(value)
+        ):
+            msg = f"{value!r} is not a valid font size value" if detail else ""
+            raise ValueError(msg)
 
 class FontStyleSpec(DataSpec):
     def __init__(self, default, *, help: str | None = None) -> None:
@@ -440,7 +440,7 @@ class UnitsSpec(NumberSpec):
         return f"{self.__class__.__name__}(units_default={units_default!r})"
 
     def get_units(self, obj: HasProps, name: str) -> str:
-        return getattr(obj, name + "_units")
+        return getattr(obj, f"{name}_units")
 
     def make_descriptors(self, base_name: str):
         """ Return a list of ``PropertyDescriptor`` instances to install on a
@@ -459,7 +459,7 @@ class UnitsSpec(NumberSpec):
         The descriptors returned are collected by the ``MetaHasProps``
         metaclass and added to ``HasProps`` subclasses during class creation.
         """
-        units_name = base_name + "_units"
+        units_name = f"{base_name}_units"
         units_props = self._units_type.make_descriptors(units_name)
         return units_props + [ UnitsSpecPropertyDescriptor(base_name, self, units_props[0]) ]
 
@@ -599,7 +599,11 @@ class ColorSpec(DataSpec):
             True, if the value could be a color tuple
 
         """
-        return isinstance(val, tuple) and len(val) in (3, 4) and all(isinstance(v, (float, int)) for v in val)
+        return (
+            isinstance(val, tuple)
+            and len(val) in {3, 4}
+            and all(isinstance(v, (float, int)) for v in val)
+        )
 
     def prepare_value(self, cls, name, value):
         # Some explanation is in order. We want to accept tuples like

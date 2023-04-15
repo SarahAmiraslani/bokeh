@@ -305,7 +305,7 @@ class BokehTornado(TornadoApplication):
             prefix = ""
         prefix = prefix.strip("/")
         if prefix:
-            prefix = "/" + prefix
+            prefix = f"/{prefix}"
 
         self._prefix = prefix
 
@@ -314,11 +314,10 @@ class BokehTornado(TornadoApplication):
         if keep_alive_milliseconds < 0:
             # 0 means "disable"
             raise ValueError("keep_alive_milliseconds must be >= 0")
-        else:
-            if keep_alive_milliseconds == 0:
-                log.info("Keep-alive ping disabled")
-            elif keep_alive_milliseconds != DEFAULT_KEEP_ALIVE_MS:
-                log.info("Keep-alive ping configured every %d milliseconds", keep_alive_milliseconds)
+        if keep_alive_milliseconds == 0:
+            log.info("Keep-alive ping disabled")
+        elif keep_alive_milliseconds != DEFAULT_KEEP_ALIVE_MS:
+            log.info("Keep-alive ping configured every %d milliseconds", keep_alive_milliseconds)
         self._keep_alive_milliseconds = keep_alive_milliseconds
 
         if check_unused_sessions_milliseconds <= 0:
@@ -412,10 +411,7 @@ class BokehTornado(TornadoApplication):
         for key, ctx in self._applications.items():
             app_patterns: URLRoutes = []
             for p in per_app_patterns:
-                if key == "/":
-                    route = p[0]
-                else:
-                    route = key + p[0]
+                route = p[0] if key == "/" else key + p[0]
                 context: RouteContext = {"application_context": self._applications[key]}
                 if issubclass(p[1], WSHandler):
                     context['compression_level'] = websocket_compression_level
@@ -455,7 +451,7 @@ class BokehTornado(TornadoApplication):
 
         log.debug("Patterns are:")
         for line in pformat(all_patterns, width=60).split("\n"):
-            log.debug("  " + line)
+            log.debug(f"  {line}")
 
         super().__init__(all_patterns, # type: ignore[arg-type] # TODO: this may be another bug in mypy (not sure; but looks suspicious)
             websocket_max_message_size=websocket_max_message_size_bytes,
@@ -618,7 +614,7 @@ class BokehTornado(TornadoApplication):
 
         '''
         mode = settings.resources(default="server")
-        if mode == "server" or mode == "server-dev":
+        if mode in ["server", "server-dev"]:
             root_url = urljoin(absolute_url or self._absolute_url or "", self._prefix)
             return Resources(mode="server", root_url=root_url, path_versioner=StaticHandler.append_version)
         return Resources(mode=mode)
@@ -691,7 +687,7 @@ class BokehTornado(TornadoApplication):
 
         '''
         if app_path not in self._applications:
-            raise ValueError("Application %s does not exist on this server" % app_path)
+            raise ValueError(f"Application {app_path} does not exist on this server")
         return self._applications[app_path].get_session(session_id)
 
     def get_sessions(self, app_path: str) -> list[ServerSession]:
@@ -707,7 +703,7 @@ class BokehTornado(TornadoApplication):
 
         '''
         if app_path not in self._applications:
-            raise ValueError("Application %s does not exist on this server" % app_path)
+            raise ValueError(f"Application {app_path} does not exist on this server")
         return list(self._applications[app_path].sessions)
 
     # Periodic Callbacks ------------------------------------------------------
@@ -728,10 +724,7 @@ class BokehTornado(TornadoApplication):
         log.debug("[pid %d] %d clients connected", PID, len(self._clients))
         for app_path, app in self._applications.items():
             sessions = list(app.sessions)
-            unused_count = 0
-            for s in sessions:
-                if s.connection_count == 0:
-                    unused_count += 1
+            unused_count = sum(s.connection_count == 0 for s in sessions)
             log.debug("[pid %d]   %s has %d sessions with %d unused",
                       PID, app_path, len(sessions), unused_count)
 
@@ -786,7 +779,7 @@ class BokehTornado(TornadoApplication):
 
 def create_static_handler(prefix: str, key: str, app: Application) -> tuple[str, type[StaticFileHandler | StaticHandler], dict[str, Any]]:
     route = prefix
-    route += "/static/(.*)" if key == "/" else key + "/static/(.*)"
+    route += "/static/(.*)" if key == "/" else f"{key}/static/(.*)"
     if app.static_path is not None:
         return (route, StaticFileHandler, {"path" : app.static_path})
     return (route, StaticHandler, {})

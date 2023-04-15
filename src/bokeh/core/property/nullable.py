@@ -71,7 +71,11 @@ class Nullable(SingleParameterizedProperty[Union[T, None]]):
         else:
             return
 
-        msg = "" if not detail else f"expected either None or a value of type {self.type_param}, got {value!r}"
+        msg = (
+            f"expected either None or a value of type {self.type_param}, got {value!r}"
+            if detail
+            else ""
+        )
         raise ValueError(msg)
 
 class NonNullable(Required[T]):

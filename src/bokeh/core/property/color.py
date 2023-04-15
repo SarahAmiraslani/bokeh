@@ -62,7 +62,7 @@ class RGB(Property[colors.RGB]):
         if isinstance(value, colors.RGB):
             return
 
-        msg = "" if not detail else f"expected RGB value, got {value!r}"
+        msg = f"expected RGB value, got {value!r}" if detail else ""
         raise ValueError(msg)
 
 

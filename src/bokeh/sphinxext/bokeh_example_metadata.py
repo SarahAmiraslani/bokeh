@@ -78,8 +78,7 @@ class BokehExampleMetadataDirective(BokehDirective):
         if not present:
             raise SphinxError("bokeh-example-metadata requires at least one option to be present.")
 
-        extra = self.options.keys() - self.option_spec.keys()
-        if extra:
+        if extra := self.options.keys() - self.option_spec.keys():
             raise SphinxError(f"bokeh-example-metadata unknown options given: {extra}.")
 
         rst_text = EXAMPLE_METADATA.render(

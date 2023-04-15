@@ -68,9 +68,7 @@ class HasDocumentRef:
         ''' The |Document| this model is attached to (can be ``None``)
 
         '''
-        if self._temp_document is not None:
-            return self._temp_document
-        return self._document
+        return self._document if self._temp_document is None else self._temp_document
 
     @document.setter
     def document(self, doc: Document) -> None:

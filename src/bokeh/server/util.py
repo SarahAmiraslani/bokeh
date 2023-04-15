@@ -93,7 +93,7 @@ def check_allowlist(host: str, allowlist: Sequence[str]) -> bool:
 
      '''
     if ':' not in host:
-        host = host + ':80'
+        host += ':80'
 
     if host in allowlist:
         return True
@@ -132,7 +132,7 @@ def create_hosts_allowlist(host_list: Sequence[str] | None, port: int | None) ->
 
     '''
     if not host_list:
-        return ['localhost:' + str(port)]
+        return [f'localhost:{str(port)}']
 
     hosts: list[str] = []
     for host in host_list:
@@ -150,17 +150,17 @@ def create_hosts_allowlist(host_list: Sequence[str] | None, port: int | None) ->
         if len(parts) == 1:
             if parts[0] == "":
                 raise ValueError("Empty host value")
-            hosts.append(host+":80")
+            hosts.append(f"{host}:80")
         elif len(parts) == 2:
             try:
                 int(parts[1])
             except ValueError:
-                raise ValueError("Invalid port in host value: %s" % host)
+                raise ValueError(f"Invalid port in host value: {host}")
             if parts[0] == "":
                 raise ValueError("Empty host value")
             hosts.append(host)
         else:
-            raise ValueError("Invalid host value: %s" % host)
+            raise ValueError(f"Invalid host value: {host}")
     return hosts
 
 def match_host(host: str, pattern: str) -> bool:
@@ -232,12 +232,7 @@ def match_host(host: str, pattern: str) -> bool:
     if len(pattern_parts) > len(host_parts):
         return False
 
-    for h, p in zip(host_parts, pattern_parts):
-        if h == p or p == '*':
-            continue
-        else:
-            return False
-    return True
+    return not any(h != p != '*' for h, p in zip(host_parts, pattern_parts))
 
 #-----------------------------------------------------------------------------
 # Dev API

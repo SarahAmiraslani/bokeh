@@ -112,8 +112,7 @@ class DocumentModuleManager:
             referrers = get_referrers(module)
             referrers = [x for x in referrers if x is not sys.modules]  # lgtm [py/comparison-using-is]
             referrers = [x for x in referrers if x is not self._modules]  # lgtm [py/comparison-using-is]
-            referrers = [x for x in referrers if not isinstance(x, FrameType)]
-            if len(referrers) != 0:
+            if referrers := [x for x in referrers if not isinstance(x, FrameType)]:
                 log.error(f"Module {module!r} has extra unexpected referrers! This could indicate a serious memory leak. Extra referrers: {referrers!r}")
 
             # remove the reference from sys.modules

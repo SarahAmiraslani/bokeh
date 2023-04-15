@@ -229,9 +229,11 @@ def from_contour(
     else:
         visuals.pop("fill_color", None)
 
-    # Check for extra unknown kwargs.
-    unknown = visuals.keys() - FillProps.properties() - HatchProps.properties()
-    if unknown:
+    if (
+        unknown := visuals.keys()
+        - FillProps.properties()
+        - HatchProps.properties()
+    ):
         raise ValueError(f"Unknown keyword arguments in 'from_contour': {', '.join(unknown)}")
 
     new_contour_data = contour_data(x=x, y=y, z=z, levels=levels, want_fill=want_fill, want_line=want_line)

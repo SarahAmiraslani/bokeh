@@ -391,7 +391,7 @@ def FuncTickFormatter(*args, **kw):
 
 def _deprecated_datetime_list_format(fmt: list[str]) -> str:
     deprecated("Passing lists of formats for DatetimeTickFormatter scales was deprecated in Bokeh 3.0. Configure a single string format for each scale")
-    if len(fmt) == 0:
+    if not fmt:
         raise ValueError("Datetime format list must contain one element")
     if len(fmt) > 1:
         warn(f"DatetimeFormatter scales now only accept a single format. Using the first provided: {fmt[0]!r}")

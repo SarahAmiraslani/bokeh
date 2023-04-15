@@ -60,7 +60,7 @@ class PandasDataFrame(Property["DataFrame"]):
         if isinstance(value, pd.DataFrame):
             return
 
-        msg = "" if not detail else f"expected Pandas DataFrame, got {value!r}"
+        msg = f"expected Pandas DataFrame, got {value!r}" if detail else ""
         raise ValueError(msg)
 
 class PandasGroupBy(Property["GroupBy[Any]"]):
@@ -79,7 +79,7 @@ class PandasGroupBy(Property["GroupBy[Any]"]):
         if isinstance(value, pd.core.groupby.GroupBy):  # type: ignore
             return
 
-        msg = "" if not detail else f"expected Pandas GroupBy, got {value!r}"
+        msg = f"expected Pandas GroupBy, got {value!r}" if detail else ""
         raise ValueError(msg)
 
 #-----------------------------------------------------------------------------

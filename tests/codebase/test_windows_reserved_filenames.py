@@ -38,11 +38,12 @@ def test_windows_reserved_filenames() -> None:
     bad: list[str] = []
     for path, _, files in os.walk(TOP_PATH):
 
-        for file in files:
-            if splitext(file)[0].upper() in RESERVED_NAMES:
-                bad.append(join(path, file))
-
-    assert len(bad) == 0, f"Windows reserved filenames detected:\n{nice_join(bad)}"
+        bad.extend(
+            join(path, file)
+            for file in files
+            if splitext(file)[0].upper() in RESERVED_NAMES
+        )
+    assert not bad, f"Windows reserved filenames detected:\n{nice_join(bad)}"
 
 #-----------------------------------------------------------------------------
 # Support

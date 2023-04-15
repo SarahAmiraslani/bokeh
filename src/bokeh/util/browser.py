@@ -81,13 +81,11 @@ def get_browser_controller(browser: str | None = None) -> BrowserLike:
     browser = settings.browser(browser)
 
     if browser is None:
-        controller = cast(BrowserLike, webbrowser)
+        return cast(BrowserLike, webbrowser)
     elif browser == "none":
-        controller = DummyWebBrowser()
+        return DummyWebBrowser()
     else:
-        controller = webbrowser.get(browser)
-
-    return controller
+        return webbrowser.get(browser)
 
 def view(location: str, browser: str | None = None, new: BrowserTarget = "same", autoraise: bool = True) -> None:
     ''' Open a browser to view the specified location.
@@ -120,7 +118,7 @@ def view(location: str, browser: str | None = None, new: BrowserTarget = "same",
     if location.startswith("http"):
         url = location
     else:
-        url = "file://" + abspath(location)
+        url = f"file://{abspath(location)}"
 
     try:
         controller = get_browser_controller(browser)

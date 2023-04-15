@@ -118,18 +118,15 @@ def html_page_for_render_items(bundle: Bundle | tuple[str, str], docs_json: dict
 
     script = wrap_in_script_tag(script_for_render_items(json_id, render_items))
 
-    context = template_variables.copy()
-
-    context.update(dict(
-        title = title,
-        bokeh_js = bokeh_js,
-        bokeh_css = bokeh_css,
-        plot_script = json + script,
-        docs = render_items,
-        base = FILE,
-        macros = MACROS,
-    ))
-
+    context = template_variables | dict(
+        title=title,
+        bokeh_js=bokeh_js,
+        bokeh_css=bokeh_css,
+        plot_script=json + script,
+        docs=render_items,
+        base=FILE,
+        macros=MACROS,
+    )
     if len(render_items) == 1:
         context["doc"] = context["docs"][0]
         context["roots"] = context["doc"].roots
@@ -142,8 +139,7 @@ def html_page_for_render_items(bundle: Bundle | tuple[str, str], docs_json: dict
     elif isinstance(template, str):
         template = get_env().from_string("{% extends base %}\n" + template)
 
-    html = template.render(context)
-    return html
+    return template.render(context)
 
 def script_for_render_items(docs_json_or_id: ID | dict[ID, DocJson], render_items: list[RenderItem],
                             app_path: str | None = None, absolute_url: str | None = None) -> str:
@@ -173,7 +169,7 @@ def script_for_render_items(docs_json_or_id: ID | dict[ID, DocJson], render_item
         docs_json = escape(docs_json, quote=False)                # make HTML-safe
         docs_json = docs_json.replace("'", "&#x27;")              # remove single quotes
         docs_json = docs_json.replace("\\", "\\\\")               # double encode escapes
-        docs_json =  "'" + docs_json + "'"                        # JS string
+        docs_json = f"'{docs_json}'"
 
     js = DOC_JS.render(
         docs_json=docs_json,

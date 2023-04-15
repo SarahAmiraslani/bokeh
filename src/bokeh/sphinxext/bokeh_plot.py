@@ -263,8 +263,7 @@ class BokehPlotDirective(BokehDirective):
             })
 
             regex = r"(:|bokeh\.)sampledata(:|\.| import )\s*(\w+(\,\s*\w+)*)"
-            matches = re.findall(regex, source)
-            if matches:
+            if matches := re.findall(regex, source):
                 keywords = set()
                 for m in matches:
                     keywords.update(m[2].replace(" ","").split(','))

@@ -99,8 +99,7 @@ def check_checkout_on_base_branch(config: Config, system: System) -> ActionRetur
 def check_checkout_is_clean(config: Config, system: System) -> ActionReturn:
     try:
         extras = system.run("git status --porcelain").split("\n")
-        extras = [x for x in extras if x != ""]
-        if extras:
+        if extras := [x for x in extras if x != ""]:
             return FAILED("Local checkout is NOT clean", extras)
         else:
             return PASSED("Local checkout is clean")
@@ -116,14 +115,13 @@ def check_checkout_matches_remote(config: Config, system: System) -> ActionRetur
         base = system.run("git merge-base @ @{u}")
         if local == remote:
             return PASSED("Checkout is up to date with GitHub")
+        if local == base:
+            status = "NEED TO PULL"
+        elif remote == base:
+            status = "NEED TO PUSH"
         else:
-            if local == base:
-                status = "NEED TO PULL"
-            elif remote == base:
-                status = "NEED TO PUSH"
-            else:
-                status = "DIVERGED"
-            return FAILED(f"Checkout is NOT up to date with GitHub ({status})")
+            status = "DIVERGED"
+        return FAILED(f"Checkout is NOT up to date with GitHub ({status})")
     except RuntimeError as e:
         return FAILED("Could not check whether local and GitHub are up to date", details=e.args)
 
@@ -133,7 +131,7 @@ def check_docs_version_config(config: Config, system: System) -> ActionReturn:
     try:
         with open(Path("docs/bokeh/switcher.json")) as fp:
             switcher = json.load(fp)
-            all_versions = set(x["version"] for x in switcher if "version" in x)
+            all_versions = {x["version"] for x in switcher if "version" in x}
             if config.version not in all_versions:
                 return FAILED(f"Version {config.version!r} is missing from switcher.json")
             return PASSED("Docs versions config is correct")
@@ -170,8 +168,7 @@ def check_version_order(config: Config, system: System) -> ActionReturn:
 
 
 def check_staging_branch_is_available(config: Config, system: System) -> ActionReturn:
-    out = system.run(f"git branch --list {config.staging_branch}")
-    if out:
+    if out := system.run(f"git branch --list {config.staging_branch}"):
         return FAILED(f"Release branch {config.staging_branch!r} ALREADY exists")
     else:
         return PASSED(f"Release branch {config.staging_branch!r} does not already exist")

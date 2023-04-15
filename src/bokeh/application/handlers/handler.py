@@ -214,10 +214,7 @@ class Handler:
         ''' Return a path to app-specific static resources, if applicable.
 
         '''
-        if self.failed:
-            return None
-        else:
-            return self._static
+        return None if self.failed else self._static
 
     def url_path(self) -> str | None:
         ''' Returns a default URL path, if applicable.

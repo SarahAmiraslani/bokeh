@@ -141,7 +141,10 @@ class TestClientServer:
         with pytest.raises(HTTPError):
             await http_get(server.io_loop, url(server))
         with pytest.raises(HTTPError):
-            await http_get(server.io_loop, url(server) + "autoload.js?bokeh-autoload-element=foo")
+            await http_get(
+                server.io_loop,
+                f"{url(server)}autoload.js?bokeh-autoload-element=foo",
+            )
 
     async def check_connect_session_fails(self, server, origin):
         with pytest.raises(HTTPError):
@@ -153,7 +156,9 @@ class TestClientServer:
 
     async def check_http_gets(self, server):
         await http_get(server.io_loop, url(server))
-        await http_get(server.io_loop, url(server) + "autoload.js?bokeh-autoload-element=foo")
+        await http_get(
+            server.io_loop, f"{url(server)}autoload.js?bokeh-autoload-element=foo"
+        )
 
     async def check_connect_session(self, server, origin):
         subprotocols = ["bokeh", generate_jwt_token("foo")]
@@ -179,7 +184,9 @@ class TestClientServer:
 
         # allow good local origin with random port
         with ManagedServerLoop(application, port=0) as server:
-            await self.check_http_ok_socket_ok(server, origin="http://localhost:%s" % server.port)
+            await self.check_http_ok_socket_ok(
+                server, origin=f"http://localhost:{server.port}"
+            )
 
         # allow good origin
         with ManagedServerLoop(application, allow_websocket_origin=["example.com"]) as server:
@@ -300,10 +307,11 @@ class TestClientServer:
         def add_roots(doc):
             import numpy as np
             rows, cols = (40000, 100)
-            columns=['x'+str(i) for i in range(cols)]
+            columns = [f'x{str(i)}' for i in range(cols)]
             a = np.random.randn(cols, rows)
             source = ColumnDataSource(data=dict(zip(columns, a)))
             doc.add_root(source)
+
         handler = FunctionHandler(add_roots)
         application.add(handler)
 
@@ -332,9 +340,11 @@ class TestClientServer:
         application = Application()
         with ManagedServerLoop(application) as server:
             with pytest.raises(IOError):
-                pull_session(session_id=ID("test__check_error_404"),
-                                              url=url(server) + 'file_not_found',
-                                              io_loop=server.io_loop)
+                pull_session(
+                    session_id=ID("test__check_error_404"),
+                    url=f'{url(server)}file_not_found',
+                    io_loop=server.io_loop,
+                )
 
     def test_request_server_info(self, ManagedServerLoop: MSL) -> None:
         application = Application()

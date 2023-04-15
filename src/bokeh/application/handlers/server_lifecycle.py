@@ -127,7 +127,7 @@ class ServerLifecycleHandler(LifecycleHandler):
             return None
         else:
             # TODO should fix invalid URL characters
-            return '/' + os.path.splitext(os.path.basename(self._runner.path))[0]
+            return f'/{os.path.splitext(os.path.basename(self._runner.path))[0]}'
 
 #-----------------------------------------------------------------------------
 # Private API

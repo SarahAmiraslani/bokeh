@@ -60,10 +60,7 @@ def bokehjsdir(dev: bool = False) -> str:
     """
     dir1 = join(ROOT_DIR, '..', 'bokehjs', 'build')
     dir2 = join(serverdir(), 'static')
-    if dev and isdir(dir1):
-        return dir1
-    else:
-        return dir2
+    return dir1 if dev and isdir(dir1) else dir2
 
 #-----------------------------------------------------------------------------
 # Dev API

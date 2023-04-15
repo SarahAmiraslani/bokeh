@@ -46,7 +46,7 @@ for a in aligns:
     for b in baselines:
         r = p.text(xs(a), ys(b), texts, text_align=a, text_baseline=b,
                    text_font_size="14px", text_line_height=1.2)
-        renderers["r" + str(i)] = r
+        renderers[f"r{str(i)}"] = r
         i += 1
 
 slider = Slider(title="Text Angle", start=0, end=45, step=1, value=0)

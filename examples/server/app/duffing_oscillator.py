@@ -81,7 +81,7 @@ def update():
     return ret_x, ret_xdot
 
 ps = []
-for i in range(2):
+for _ in range(2):
     p = figure(
         width=600, height=600, x_range=Range1d(-2.0, 2.0), y_range=Range1d(-2.0, 2.0),
         toolbar_location=None, background_fill_color="#f6f6f6",

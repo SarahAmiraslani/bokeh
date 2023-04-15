@@ -65,9 +65,9 @@ fruits = {
 
 # Plot with multiple ranges that are bounded
 x = np.array(AAPL['date'], dtype=np.datetime64)
-x = x[0:1000]
-apple_y = AAPL['adj_close'][0:1000]
-google_y = GOOG['adj_close'][0:1000]
+x = x[:1000]
+apple_y = AAPL['adj_close'][:1000]
+google_y = GOOG['adj_close'][:1000]
 
 x_range = Range1d(
     start=datetime(2000, 1, 1), end=datetime(2004, 12, 31),

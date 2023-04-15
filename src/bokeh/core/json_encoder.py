@@ -150,11 +150,7 @@ def serialize_json(obj: Any | Serialized[Any], *, pretty: bool | None = None, in
     '''
     pretty = settings.pretty(pretty)
 
-    if pretty:
-        separators=(",", ": ")
-    else:
-        separators=(",", ":")
-
+    separators = (",", ": ") if pretty else (",", ":")
     if pretty and indent is None:
         indent = 2
 
@@ -183,10 +179,7 @@ class PayloadEncoder(JSONEncoder):
 
     def default(self, obj: Any) -> Any:
         if isinstance(obj, Buffer):
-            if obj.id in self._buffers: # TODO: and len(obj.data) > self._threshold:
-                return obj.ref
-            else:
-                return obj.to_base64()
+            return obj.ref if obj.id in self._buffers else obj.to_base64()
         else:
             return super().default(obj)
 

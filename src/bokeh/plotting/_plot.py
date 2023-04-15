@@ -173,9 +173,7 @@ def _get_num_minor_ticks(axis_class: type[Axis], num_minor_ticks: int | Literal[
     if num_minor_ticks is None:
         return 0
     if num_minor_ticks == 'auto':
-        if axis_class is LogAxis:
-            return 10
-        return 5
+        return 10 if axis_class is LogAxis else 5
 
 #-----------------------------------------------------------------------------
 # Code

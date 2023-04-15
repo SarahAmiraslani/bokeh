@@ -55,12 +55,15 @@ if TYPE_CHECKING:
 def _compute_datetime_types() -> set[type]:
     import pandas as pd
 
-    result = {dt.time, dt.datetime, np.datetime64}
-    result.add(pd.Timestamp)
-    result.add(pd.Timedelta)
-    result.add(pd.Period)
-    result.add(type(pd.NaT))
-    return result
+    return {
+        dt.time,
+        dt.datetime,
+        np.datetime64,
+        pd.Timestamp,
+        pd.Timedelta,
+        pd.Period,
+        type(pd.NaT),
+    }
 
 def __getattr__(name: str) -> Any:
     if name == "DATETIME_TYPES":
@@ -259,12 +262,11 @@ def make_id() -> ID:
     '''
     global _simple_id
 
-    if settings.simple_ids():
-        with _simple_id_lock:
-            _simple_id += 1
-            return ID(f"p{_simple_id}")
-    else:
+    if not settings.simple_ids():
         return make_globally_unique_id()
+    with _simple_id_lock:
+        _simple_id += 1
+        return ID(f"p{_simple_id}")
 
 def make_globally_unique_id() -> ID:
     ''' Return a globally unique UUID.
@@ -291,7 +293,7 @@ def make_globally_unique_css_safe_id() -> ID:
     '''
     max_iter = 100
 
-    for _i in range(0, max_iter):
+    for _i in range(max_iter):
         id = make_globally_unique_id()
         if id[0].isalpha():
             return id
@@ -371,13 +373,11 @@ def transform_series(series: pd.Series[Any] | pd.Index | pd.api.extensions.Exten
     '''
     import pandas as pd
 
-    # not checking for pd here, this function should only be called if it
-    # is already known that series is a Pandas Series type
-    if isinstance(series, pd.PeriodIndex):
-        vals = series.to_timestamp().values  # type: ignore
-    else:
-        vals = series.to_numpy()
-    return vals
+    return (
+        series.to_timestamp().values
+        if isinstance(series, pd.PeriodIndex)
+        else series.to_numpy()
+    )
 
 #-----------------------------------------------------------------------------
 # Dev API

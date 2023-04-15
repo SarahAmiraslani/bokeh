@@ -197,9 +197,11 @@ def sort_by_basename(refs):
     refs = [{'basename':basename(ref['docname']), 'docname': ref['docname']} for ref in refs]
     sorted_refs = []
     for key in sorted([basename(ref['basename']) for ref in refs]):
-        for i, value in enumerate(refs):
-            if key == value['basename']:
-                sorted_refs.append(refs.pop(i))
+        sorted_refs.extend(
+            refs.pop(i)
+            for i, value in enumerate(refs)
+            if key == value['basename']
+        )
     return sorted_refs
 
 def add_bullet_point(app, fromdocname, docname, ref_name):

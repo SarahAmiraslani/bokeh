@@ -251,9 +251,8 @@ def gridplot(
     if toolbar_options is None:
         toolbar_options = {}
 
-    if toolbar_location:
-        if not hasattr(Location, toolbar_location):
-            raise ValueError(f"Invalid value of toolbar_location: {toolbar_location}")
+    if toolbar_location and not hasattr(Location, toolbar_location):
+        raise ValueError(f"Invalid value of toolbar_location: {toolbar_location}")
 
     children = _parse_children_arg(children=children)
     if ncols:
@@ -299,7 +298,10 @@ def gridplot(
         else:
             return None
 
-    toolbar = Toolbar(tools=tools if not merge_tools else group_tools(tools, merge=merge), **toolbar_options)
+    toolbar = Toolbar(
+        tools=group_tools(tools, merge=merge) if merge_tools else tools,
+        **toolbar_options
+    )
     return GridPlot(children=items, toolbar=toolbar, toolbar_location=toolbar_location, sizing_mode=sizing_mode)
 
 # XXX https://github.com/python/mypy/issues/731
@@ -563,7 +565,7 @@ def _has_auto_sizing(item: LayoutDOM) -> bool:
 L = TypeVar("L", bound=LayoutDOM)
 def _parse_children_arg(*args: L | list[L], children: list[L] | None = None) -> list[L]:
     # Set-up Children from args or kwargs
-    if len(args) > 0 and children is not None:
+    if args and children is not None:
         raise ValueError("'children' keyword cannot be used with positional arguments")
 
     if not children:
