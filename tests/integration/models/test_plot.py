@@ -131,12 +131,12 @@ class Test_Plot:
         # Wait for drag to happen
         time.sleep(0.1)
         assert good_events == ["LODStart"]
-        assert bad_events == []
+        assert not bad_events
 
         # Wait for lod_timeout to hit
         time.sleep(0.3)
         assert good_events == ["LODStart", "LODEnd"]
-        assert bad_events == []
+        assert not bad_events
 
     def test_ranges_update_event_trigger_on_pan(self, bokeh_server_page: BokehServerPage) -> None:
         events = []

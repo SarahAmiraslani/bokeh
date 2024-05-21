@@ -88,10 +88,7 @@ class Color(Serializable, metaclass=ABCMeta):
         '''
         value = max(value, 0)
 
-        if maximum is not None:
-            return min(value, maximum)
-        else:
-            return value
+        return min(value, maximum) if maximum is not None else value
 
     @abstractmethod
     def copy(self: Self) -> Self:

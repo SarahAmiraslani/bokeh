@@ -89,7 +89,7 @@ __all__ = (
 @pytest.fixture
 def output_file_url(request: pytest.FixtureRequest, file_server: SimpleWebServer) -> str:
     from bokeh.io import output_file
-    file_name = request.function.__name__ + '.html'
+    file_name = f'{request.function.__name__}.html'
     file_path = request.node.path.with_name(file_name)
 
     output_file(file_path, mode='inline')
@@ -97,18 +97,20 @@ def output_file_url(request: pytest.FixtureRequest, file_server: SimpleWebServer
     def tear_down() -> None:
         if file_path.is_file():
             file_path.unlink()
+
     request.addfinalizer(tear_down)
 
     return file_server.where_is(file_path)
 
 @pytest.fixture
 def test_file_path_and_url(request: pytest.FixtureRequest, file_server: SimpleWebServer) -> tuple[str, str]:
-    file_name = request.function.__name__ + '.html'
+    file_name = f'{request.function.__name__}.html'
     file_path = request.node.path.with_name(file_name)
 
     def tear_down() -> None:
         if file_path.is_file():
             file_path.unlink()
+
     request.addfinalizer(tear_down)
 
     return file_path, file_server.where_is(file_path)
@@ -229,8 +231,7 @@ class _CanvasMixin(_ElementMixin):
             const toolbar_view = [...Object.values(Bokeh.index)[0].owner.query((view) => view.model.id == toolbar_id)][0]
             return toolbar_view.model.tools.map((tool) => [...toolbar_view.owner.query((btn) => btn.model.tool == tool)][0].el)
         """
-        buttons = self._driver.execute_script(script, plot.toolbar.id)
-        return buttons
+        return self._driver.execute_script(script, plot.toolbar.id)
 
 class _BokehPageMixin(_ElementMixin):
 

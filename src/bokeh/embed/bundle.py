@@ -232,9 +232,8 @@ def _query_extensions(all_objs: set[Model], query: Callable[[type[Model]], bool]
         names.add(name)
 
         for model in Model.model_class_reverse_map.values():
-            if model.__module__.startswith(name):
-                if query(model):
-                    return True
+            if model.__module__.startswith(name) and query(model):
+                return True
 
     return False
 
@@ -396,13 +395,19 @@ def _model_requires_mathjax(model: Model) -> bool:
     from ..models.widgets.markups import Div, Paragraph
     from ..models.widgets.sliders import AbstractSlider
 
-    if isinstance(model, TextAnnotation):
-        if isinstance(model.text, str) and is_tex_string(model.text):
-            return True
+    if (
+        isinstance(model, TextAnnotation)
+        and isinstance(model.text, str)
+        and is_tex_string(model.text)
+    ):
+        return True
 
-    if isinstance(model, AbstractSlider):
-        if isinstance(model.title, str) and is_tex_string(model.title):
-            return True
+    if (
+        isinstance(model, AbstractSlider)
+        and isinstance(model.title, str)
+        and is_tex_string(model.title)
+    ):
+        return True
 
     if isinstance(model, Axis):
         if isinstance(model.axis_label, str) and is_tex_string(model.axis_label):
@@ -412,15 +417,19 @@ def _model_requires_mathjax(model: Model) -> bool:
             if isinstance(val, str) and is_tex_string(val):
                 return True
 
-    if isinstance(model, Div) and not model.disable_math and not model.render_as_text:
-        if contains_tex_string(model.text):
-            return True
+    if (
+        isinstance(model, Div)
+        and not model.disable_math
+        and not model.render_as_text
+        and contains_tex_string(model.text)
+    ):
+        return True
 
-    if isinstance(model, Paragraph) and not model.disable_math:
-        if contains_tex_string(model.text):
-            return True
-
-    return False
+    return bool(
+        isinstance(model, Paragraph)
+        and not model.disable_math
+        and contains_tex_string(model.text)
+    )
 
 def _use_mathjax(all_objs: set[Model]) -> bool:
     ''' Whether a collection of Bokeh objects contains a model requesting MathJax

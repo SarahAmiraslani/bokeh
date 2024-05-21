@@ -309,11 +309,8 @@ class Message(Generic[Content]):
             raise ValueError("Cannot send to connection None")
 
         with await conn.write_lock.acquire():
-            sent = 0
-
             await conn.write_message(self.header_json, locked=False)
-            sent += len(self.header_json)
-
+            sent = 0 + len(self.header_json)
             # uncomment this to make it a lot easier to reproduce lock-related bugs
             #await asyncio.sleep(0.1)
 

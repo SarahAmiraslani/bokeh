@@ -937,8 +937,7 @@ class UnitsSpecPropertyDescriptor(DataSpecPropertyDescriptor):
         if isinstance(value, dict):
             if 'units' in value:
                 value = copy(value) # so we can modify it
-            units = value.pop("units", None)
-            if units:
+            if units := value.pop("units", None):
                 self.units_prop.__set__(obj, units)
         return value
 

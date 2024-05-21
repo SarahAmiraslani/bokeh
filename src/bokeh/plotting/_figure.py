@@ -187,7 +187,7 @@ class figure(Plot, GlyphAPI):
         opts = FigureOptions(kw)
 
         names = self.properties()
-        for name in kw.keys():
+        for name in kw:
             if name not in names:
                 self._raise_attribute_error_with_matches(name, names | opts.properties())
 
@@ -380,10 +380,7 @@ class figure(Plot, GlyphAPI):
                 p.harea(x1=stack('2016'), x2=stack('2016', '2017'), y='y', color='red',  source=source, name='2017')
 
         '''
-        result = []
-        for kw in double_stack(stackers, "x1", "x2", **kw):
-            result.append(self.harea(**kw))
-        return result
+        return [self.harea(**kw) for kw in double_stack(stackers, "x1", "x2", **kw)]
 
     def hbar_stack(self, stackers, **kw):
         ''' Generate multiple ``HBar`` renderers for levels stacked left to right.
@@ -421,10 +418,9 @@ class figure(Plot, GlyphAPI):
                 p.hbar(bottom=stack('2016'), top=stack('2016', '2017'), y=10, width=0.9, color='red',  source=source, name='2017')
 
         '''
-        result = []
-        for kw in double_stack(stackers, "left", "right", **kw):
-            result.append(self.hbar(**kw))
-        return result
+        return [
+            self.hbar(**kw) for kw in double_stack(stackers, "left", "right", **kw)
+        ]
 
     def _line_stack(self, x, y, **kw):
         ''' Generate multiple ``Line`` renderers for lines stacked vertically
@@ -560,10 +556,7 @@ class figure(Plot, GlyphAPI):
                 p.varea(y1=stack('2016'), y2=stack('2016', '2017'), x='x', color='red',  source=source, name='2017')
 
         '''
-        result = []
-        for kw in double_stack(stackers, "y1", "y2", **kw):
-            result.append(self.varea(**kw))
-        return result
+        return [self.varea(**kw) for kw in double_stack(stackers, "y1", "y2", **kw)]
 
     def vbar_stack(self, stackers, **kw):
         ''' Generate multiple ``VBar`` renderers for levels stacked bottom
@@ -602,10 +595,9 @@ class figure(Plot, GlyphAPI):
                 p.vbar(bottom=stack('2016'), top=stack('2016', '2017'), x=10, width=0.9, color='red',  source=source, name='2017')
 
         '''
-        result = []
-        for kw in double_stack(stackers, "bottom", "top", **kw):
-            result.append(self.vbar(**kw))
-        return result
+        return [
+            self.vbar(**kw) for kw in double_stack(stackers, "bottom", "top", **kw)
+        ]
 
     def vline_stack(self, stackers, **kw):
         ''' Generate multiple ``Line`` renderers for lines stacked vertically.

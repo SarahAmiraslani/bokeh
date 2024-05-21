@@ -749,9 +749,9 @@ class Settings:
         '''
         css_files: list[str] = []
         for root, _, files in os.walk(self.bokehjsdir()):
-            for fname in files:
-                if fname.endswith(".css"):
-                    css_files.append(join(root, fname))
+            css_files.extend(
+                join(root, fname) for fname in files if fname.endswith(".css")
+            )
         return css_files
 
     def js_files(self) -> list[str]:
@@ -760,9 +760,7 @@ class Settings:
         '''
         js_files: list[str] = []
         for root, _, files in os.walk(self.bokehjsdir()):
-            for fname in files:
-                if fname.endswith(".js"):
-                    js_files.append(join(root, fname))
+            js_files.extend(join(root, fname) for fname in files if fname.endswith(".js"))
         return js_files
 
     def load_config(self, location: str) -> None:
@@ -782,10 +780,7 @@ class Settings:
         '''
         if not hasattr(self, '_secret_key_bytes'):
             key = self.secret_key()
-            if key is None:
-                self._secret_key_bytes = None
-            else:
-                self._secret_key_bytes = key.encode("utf-8")
+            self._secret_key_bytes = None if key is None else key.encode("utf-8")
         return self._secret_key_bytes
 
     def _try_load_config(self, locations: Sequence[str]) -> dict[str, Any]:

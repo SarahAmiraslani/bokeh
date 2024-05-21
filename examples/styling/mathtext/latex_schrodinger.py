@@ -10,6 +10,7 @@ mathtext on ``Label`` and ``Title`` annotations.
 .. _Harmonic oscillator wavefunctions: https://scipython.com/blog/the-harmonic-oscillator-wavefunctions
 
 '''
+
 import numpy as np
 from scipy.special import factorial, hermite
 
@@ -49,8 +50,15 @@ for v in range(number_of_modes):
     p.varea(q, ylower, E_v, fill_color= "#E66100")
     p.line(q, y, color="red", line_width=2)
 
-    p.add_layout(Label(x=-5.8, y=E_v, y_offset=-21, text=r"$$v = " + str(v) + r"$$"))
-    p.add_layout(Label(x=3.9, y=E_v, y_offset=-25, text=r"$$E_" + str(v) + r" = (" + str(2*v+1) + r"/2) \hbar\omega$$"))
+    p.add_layout(Label(x=-5.8, y=E_v, y_offset=-21, text=f"$$v = {str(v)}$$"))
+    p.add_layout(
+        Label(
+            x=3.9,
+            y=E_v,
+            y_offset=-25,
+            text=f"$$E_{str(v)} = ({str(2 * v + 1)}" + r"/2) \hbar\omega$$",
+        )
+    )
 
 V = q**2 / 2
 p.line(q, V, line_color="black", line_width=2, line_dash="dashed")

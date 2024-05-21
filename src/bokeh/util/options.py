@@ -66,12 +66,7 @@ class Options(HasProps, Local):
 
     def __init__(self, kw: dict[str, Any]) -> None:
 
-        # remove any items that match our declared properties
-        props: dict[str, Any] = {}
-        for k in self.properties():
-            if k in kw:
-                props[k] = kw.pop(k)
-
+        props: dict[str, Any] = {k: kw.pop(k) for k in self.properties() if k in kw}
         super().__init__(**props)
 
 #-----------------------------------------------------------------------------

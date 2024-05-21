@@ -187,10 +187,7 @@ class Property(PropertyDescriptorFactory[T]):
         """
         if not callable(default):
             return copy(default)
-        else:
-            if no_eval:
-                return default
-            return default()
+        return default if no_eval else default()
 
     def _raw_default(self, *, no_eval: bool = False) -> T:
         """ Return the untransformed default value.
@@ -368,11 +365,7 @@ class Property(PropertyDescriptorFactory[T]):
             obj = owner
 
             for fn, msg_or_fn in self.assertions:
-                if isinstance(fn, bool):
-                    result = fn
-                else:
-                    result = fn(obj, value)
-
+                result = fn if isinstance(fn, bool) else fn(obj, value)
                 assert isinstance(result, bool)
 
                 if not result:
@@ -434,10 +427,7 @@ class Property(PropertyDescriptorFactory[T]):
         return self
 
     def replace(self, old: type[Property[Any]], new: Property[Any]) -> Property[Any]:
-        if self.__class__ == old:
-            return new
-        else:
-            return self
+        return new if self.__class__ == old else self
 
 class ParameterizedProperty(Property[T]):
     """ A base class for Properties that have type parameters, e.g. ``List(String)``.
@@ -502,9 +492,8 @@ class ParameterizedProperty(Property[T]):
     def replace(self, old: type[Property[Any]], new: Property[Any]) -> Property[Any]:
         if self.__class__ == old:
             return new
-        else:
-            params = [ type_param.replace(old, new) for type_param in self.type_params ]
-            return self.__class__(*params)
+        params = [ type_param.replace(old, new) for type_param in self.type_params ]
+        return self.__class__(*params)
 
 class SingleParameterizedProperty(ParameterizedProperty[T]):
     """ A parameterized property with a single type parameter. """

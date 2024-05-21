@@ -79,8 +79,7 @@ def build_js() -> None:
 def install_js(packages: list[str]) -> None:
     print("\nInstalling BokehJS... ", end="")
 
-    missing = [fn for fn in JS_FILES if not (BUILD_JS / fn).exists()]
-    if missing:
+    if missing := [fn for fn in JS_FILES if not (BUILD_JS / fn).exists()]:
         die(BOKEHJS_INSTALL_FAIL.format(missing=", ".join(missing)))
 
     if not PKG_JS.is_symlink():
@@ -96,10 +95,11 @@ def install_js(packages: list[str]) -> None:
             for lib_file in BUILD_TSLIB.glob("lib.*.d.ts"):
                 copy(lib_file, PKG_TSLIB)
 
-    new = set(
+    new = {
         ".".join([*Path(parent).relative_to(SRC_ROOT).parts, d])
-        for parent, dirs, _ in os.walk(PKG_STATIC) for d in dirs
-    )
+        for parent, dirs, _ in os.walk(PKG_STATIC)
+        for d in dirs
+    }
     existing = set(packages)
     packages.extend(tuple(new-existing))
 

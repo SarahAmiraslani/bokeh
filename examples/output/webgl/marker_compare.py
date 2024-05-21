@@ -28,8 +28,8 @@ def make_plot(title, marker, backend):
 tabs = []
 for marker in MarkerType:
     p1 = make_plot(marker, marker, "canvas")
-    p2 = make_plot(marker + ' SVG', marker, "svg")
-    p3 = make_plot(marker + ' GL', marker, "webgl")
+    p2 = make_plot(f'{marker} SVG', marker, "svg")
+    p3 = make_plot(f'{marker} GL', marker, "webgl")
     tabs.append(TabPanel(child=row(p1, p2, p3), title=marker))
 
 show(Tabs(tabs=tabs))

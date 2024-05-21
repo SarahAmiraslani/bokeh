@@ -88,7 +88,11 @@ class Regex(String):
         if self.regex.match(value):
             return
 
-        msg = "" if not detail else f"expected a string matching {self.regex.pattern!r} pattern, got {value!r}"
+        msg = (
+            f"expected a string matching {self.regex.pattern!r} pattern, got {value!r}"
+            if detail
+            else ""
+        )
         raise ValueError(msg)
 
 class MathString(String):

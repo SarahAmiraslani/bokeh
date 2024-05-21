@@ -198,7 +198,7 @@ def show_session(
             browser: str | None = None,
             new: BrowserTarget = "tab",
             controller: BrowserLike | None = None) -> None:
-        ''' Open a browser displaying a session document.
+    ''' Open a browser displaying a session document.
 
         If you have a session from ``pull_session()`` or ``push_session`` you
         can ``show_session(session=mysession)``. If you don't need to open a
@@ -227,20 +227,22 @@ def show_session(
                 opens a new tab. If **new** is 'window', then opens a new window.
 
         '''
-        if session is not None:
-            server_url = server_url_for_websocket_url(session._connection.url)
-            session_id = session.id
-        else:
-            coords = SessionCoordinates(session_id=session_id, url=url)
-            server_url = coords.url
-            session_id = coords.session_id
+    if session is not None:
+        server_url = server_url_for_websocket_url(session._connection.url)
+        session_id = session.id
+    else:
+        coords = SessionCoordinates(session_id=session_id, url=url)
+        server_url = coords.url
+        session_id = coords.session_id
 
-        if controller is None:
-            from bokeh.util.browser import get_browser_controller
-            controller = get_browser_controller(browser=browser)
+    if controller is None:
+        from bokeh.util.browser import get_browser_controller
+        controller = get_browser_controller(browser=browser)
 
-        controller.open(server_url + "?bokeh-session-id=" + quote_plus(session_id),
-                        new=NEW_PARAM[new])
+    controller.open(
+        f"{server_url}?bokeh-session-id={quote_plus(session_id)}",
+        new=NEW_PARAM[new],
+    )
 
 class ClientSession:
     ''' Represents a websocket connection to a server-side session.
@@ -425,10 +427,7 @@ class ClientSession:
         self.connect()
         self.check_connection_errors()
 
-        if self.document is None:
-            doc = Document()
-        else:
-            doc = self.document
+        doc = Document() if self.document is None else self.document
         self._connection.pull_doc(doc)
         if self.document is None:
             self._attach_document(doc)
@@ -449,15 +448,11 @@ class ClientSession:
 
         '''
         if self.document is None:
-            if document is None:
-                doc = Document()
-            else:
-                doc = document
+            doc = Document() if document is None else document
+        elif document is None:
+            doc = self.document
         else:
-            if document is None:
-                doc = self.document
-            else:
-                raise ValueError("Cannot push() a different document from existing session.document")
+            raise ValueError("Cannot push() a different document from existing session.document")
 
         self.connect()
         self.check_connection_errors()

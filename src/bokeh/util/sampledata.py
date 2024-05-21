@@ -116,9 +116,8 @@ def external_data_dir(create: bool = False) -> Path:
             data_dir.mkdir()
         except OSError:
             raise RuntimeError(f"could not create bokeh data directory at {data_dir}")
-    else:
-        if not data_dir.is_dir():
-            raise RuntimeError(f"{data_dir} exists but is not a directory")
+    elif not data_dir.is_dir():
+        raise RuntimeError(f"{data_dir} exists but is not a directory")
 
     return data_dir
 
@@ -171,9 +170,8 @@ def _bokeh_dir(create: bool = False) -> Path:
             bokeh_dir.mkdir()
         except OSError:
             raise RuntimeError(f"could not create bokeh config directory at {bokeh_dir}")
-    else:
-        if not bokeh_dir.is_dir():
-            raise RuntimeError(f"{bokeh_dir} exists but is not a directory")
+    elif not bokeh_dir.is_dir():
+        raise RuntimeError(f"{bokeh_dir} exists but is not a directory")
     return bokeh_dir
 
 def _download_file(base_url: str, filename: str, data_dir: Path, progress: bool = True) -> None:

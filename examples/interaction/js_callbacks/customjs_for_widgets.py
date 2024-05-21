@@ -2,7 +2,7 @@ from bokeh.layouts import column
 from bokeh.models import ColumnDataSource, CustomJS, Slider
 from bokeh.plotting import figure, show
 
-x = [x*0.005 for x in range(0, 200)]
+x = [x*0.005 for x in range(200)]
 y = x
 
 source = ColumnDataSource(data=dict(x=x, y=y))

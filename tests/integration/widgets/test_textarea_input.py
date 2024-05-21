@@ -78,7 +78,7 @@ class Test_TextInput:
         page = bokeh_server_page(mk_modify_doc(text_input))
 
         el = find_element_for(page.driver, text_input, "textarea")
-        enter_text_in_element(page.driver, el, "val1" + Keys.TAB)
+        enter_text_in_element(page.driver, el, f"val1{Keys.TAB}")
 
         page.eval_custom_action()
         results = page.results

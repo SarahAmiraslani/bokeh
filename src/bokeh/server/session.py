@@ -164,9 +164,7 @@ class ServerSession:
     @property
     def token(self) -> str:
         ''' A JWT token to authenticate the session. '''
-        if self._token:
-            return self._token
-        return generate_jwt_token(self.id)
+        return self._token if self._token else generate_jwt_token(self.id)
 
     @property
     def destroyed(self) -> bool:

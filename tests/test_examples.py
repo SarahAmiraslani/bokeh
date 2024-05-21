@@ -89,37 +89,37 @@ def get_all_examples(config: _pytest.config.Config) -> list[Example]:
     return _examples
 
 def pytest_generate_tests(metafunc: _pytest.python.Metafunc) -> None:
-    if 'example' in metafunc.fixturenames:
-        config = metafunc.config
-        examples = get_all_examples(config)
+    if 'example' not in metafunc.fixturenames:
+        return
+    config = metafunc.config
+    examples = get_all_examples(config)
 
-        def marks(example: Example) -> list[_pytest.mark.MarkDecorator]:
-            result = []
-            if example.is_skip:
-                result.append(pytest.mark.skip(reason=f"skipping {example.relpath}"))
-            if example.is_xfail and not example.no_js:
-                result.append(pytest.mark.xfail(reason=f"xfail {example.relpath}", strict=True))
-            return result
+    def marks(example: Example) -> list[_pytest.mark.MarkDecorator]:
+        result = []
+        if example.is_skip:
+            result.append(pytest.mark.skip(reason=f"skipping {example.relpath}"))
+        if example.is_xfail and not example.no_js:
+            result.append(pytest.mark.xfail(reason=f"xfail {example.relpath}", strict=True))
+        return result
 
-        if 'file_example' in metafunc.fixturenames:
-            params = [ pytest.param(e.path, e, config, marks=marks(e)) for e in examples if e.is_file ]
-            metafunc.parametrize('file_example,example,config', params)
-        if 'server_example' in metafunc.fixturenames:
-            params = [ pytest.param(e.path, e, config, marks=marks(e)) for e in examples if e.is_server ]
-            metafunc.parametrize('server_example,example,config', params)
-        if 'notebook_example' in metafunc.fixturenames:
-            params = [ pytest.param(e.path, e, config, marks=marks(e)) for e in examples if e.is_notebook ]
-            metafunc.parametrize('notebook_example,example,config', params)
+    if 'file_example' in metafunc.fixturenames:
+        params = [ pytest.param(e.path, e, config, marks=marks(e)) for e in examples if e.is_file ]
+        metafunc.parametrize('file_example,example,config', params)
+    if 'server_example' in metafunc.fixturenames:
+        params = [ pytest.param(e.path, e, config, marks=marks(e)) for e in examples if e.is_server ]
+        metafunc.parametrize('server_example,example,config', params)
+    if 'notebook_example' in metafunc.fixturenames:
+        params = [ pytest.param(e.path, e, config, marks=marks(e)) for e in examples if e.is_notebook ]
+        metafunc.parametrize('notebook_example,example,config', params)
 
 @pytest.fixture(scope="session", autouse=True)
 def report() -> Iterator[list[Example]]:
     report: list[Example] = []
     yield report
 
-    images = ""
-    for example in report:
-        images += relpath(example.img_path, BASE_DIR) + "\n"
-
+    images = "".join(
+        relpath(example.img_path, BASE_DIR) + "\n" for example in report
+    )
     contents = ""
     for example in report:
         path = relpath(example.path, BASE_DIR)
@@ -150,7 +150,7 @@ def test_file_examples(file_example: Example, example: Example, report: list[Exa
     if config.option.verbose:
         print()
     (status, duration, out, err) = _run_example(example)
-    info("Example run in %s" % white("%.3fs" % duration))
+    info(f'Example run in {white("%.3fs" % duration)}')
 
     for line in out.split("\n"):
         if len(line) == 0 or line.startswith("Wrote "):
@@ -286,7 +286,7 @@ with open(filename, 'rb') as example:
             raise Timeout
 
         signal.signal(signal.SIGALRM, alarm_handler)
-        signal.alarm(20 if not example.is_slow else 60)
+        signal.alarm(60 if example.is_slow else 20)
 
     start = time.time()
     with subprocess.Popen(

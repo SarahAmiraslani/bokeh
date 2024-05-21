@@ -92,13 +92,13 @@ class Model(HasProps, HasDocumentRef, PropertyCallbackManager, EventCallbackMana
 
         # Setting 'id' implies deferred initialization, which means properties
         # will be initialized in a separate step by a deserializer, etc.
-        if id is not None:
-            if args or kwargs:
-                raise ValueError("'id' cannot be used together with property initializers")
-            obj._id = id
-        else:
+        if id is None:
             obj._id = make_id()
 
+        elif args or kwargs:
+            raise ValueError("'id' cannot be used together with property initializers")
+        else:
+            obj._id = id
         return obj
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
@@ -423,7 +423,7 @@ class Model(HasProps, HasDocumentRef, PropertyCallbackManager, EventCallbackMana
             source.js_on_change('streaming', callback)
 
         '''
-        if len(callbacks) == 0:
+        if not callbacks:
             raise ValueError("js_on_change takes an event name and one or more callbacks, got only one parameter")
 
         # handle any CustomJS callbacks here
@@ -435,7 +435,7 @@ class Model(HasProps, HasDocumentRef, PropertyCallbackManager, EventCallbackMana
         if descriptor is not None:
             event = f"change:{descriptor.name}"
 
-        old = {k: [cb for cb in cbs] for k, cbs in self.js_property_callbacks.items()}
+        old = {k: list(cbs) for k, cbs in self.js_property_callbacks.items()}
         if event not in self.js_property_callbacks:
             self.js_property_callbacks[event] = []
         for callback in callbacks:
@@ -497,9 +497,7 @@ class Model(HasProps, HasDocumentRef, PropertyCallbackManager, EventCallbackMana
         result = list(self.select(selector))
         if len(result) > 1:
             raise ValueError(f"Found more than one object matching {selector}: {result!r}")
-        if len(result) == 0:
-            return None
-        return result[0]
+        return result[0] if result else None
 
     def set_select(self, selector: type[Model] | SelectorType, updates: dict[str, Any]) -> None:
         ''' Update objects that match a given selector with the specified

@@ -65,7 +65,7 @@ class NonNegative(SingleParameterizedProperty[T]):
     def validate(self, value: Any, detail: bool = True) -> None:
         super().validate(value, detail)
 
-        if not (0 <= value):
+        if value < 0:
             raise ValueError(f"expected a non-negative number, got {value!r}")
 
 class Positive(SingleParameterizedProperty[T]):
@@ -77,7 +77,7 @@ class Positive(SingleParameterizedProperty[T]):
     def validate(self, value: Any, detail: bool = True) -> None:
         super().validate(value, detail)
 
-        if not (0 < value):
+        if value <= 0:
             raise ValueError(f"expected a positive number, got {value!r}")
 
 class NonNegativeInt(Int):
@@ -96,7 +96,7 @@ class NonNegativeInt(Int):
     def validate(self, value: Any, detail: bool = True) -> None:
         super().validate(value, detail)
 
-        if not (0 <= value):
+        if value < 0:
             raise ValueError(f"expected non-negative integer, got {value!r}")
 
 class PositiveInt(Int):
@@ -115,7 +115,7 @@ class PositiveInt(Int):
     def validate(self, value: Any, detail: bool = True) -> None:
         super().validate(value, detail)
 
-        if not (0 < value):
+        if value <= 0:
             raise ValueError(f"expected positive integer, got {value!r}")
 
 class Interval(SingleParameterizedProperty[T]):
@@ -171,8 +171,16 @@ class Interval(SingleParameterizedProperty[T]):
     def validate(self, value: Any, detail: bool = True) -> None:
         super().validate(value, detail)
 
-        if not (self.type_param.is_valid(value) and value >= self.start and value <= self.end):
-            msg = "" if not detail else f"expected a value of type {self.type_param} in range [{self.start}, {self.end}], got {value!r}"
+        if (
+            not self.type_param.is_valid(value)
+            or value < self.start
+            or value > self.end
+        ):
+            msg = (
+                f"expected a value of type {self.type_param} in range [{self.start}, {self.end}], got {value!r}"
+                if detail
+                else ""
+            )
             raise ValueError(msg)
 
 class Byte(Interval[int]):
@@ -234,7 +242,7 @@ class Size(Float):
         super().validate(value, detail)
 
         if value < 0:
-            msg = "" if not detail else f"expected a non-negative number, got {value!r}"
+            msg = f"expected a non-negative number, got {value!r}" if detail else ""
             raise ValueError(msg)
 
 class Percent(Float):
@@ -280,7 +288,7 @@ class Percent(Float):
         if 0.0 <= value <= 1.0:
             return
 
-        msg = "" if not detail else f"expected a value in range [0, 1], got {value!r}"
+        msg = f"expected a value in range [0, 1], got {value!r}" if detail else ""
         raise ValueError(msg)
 
 class Angle(Float):

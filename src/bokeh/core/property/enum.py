@@ -59,7 +59,7 @@ class Enum(String):
     def __init__(self, enum: str, *values: str, default: Init[str] = ..., help: str | None = ...) -> None: ...
 
     def __init__(self, enum: str | enums.Enumeration, *values: str, default: Init[str] = Intrinsic, help: str | None = None) -> None:
-        if not (not values and isinstance(enum, enums.Enumeration)):
+        if values or not isinstance(enum, enums.Enumeration):
             enum = enums.enumeration(enum, *values)
         self._enum = enum
 
@@ -81,7 +81,11 @@ class Enum(String):
         if value in self._enum:
             return
 
-        msg = "" if not detail else f"invalid value: {value!r}; allowed values are {nice_join(self.allowed_values)}"
+        msg = (
+            f"invalid value: {value!r}; allowed values are {nice_join(self.allowed_values)}"
+            if detail
+            else ""
+        )
         raise ValueError(msg)
 
 #-----------------------------------------------------------------------------

@@ -136,8 +136,7 @@ class BokehJSContent(CodeBlock):
         document = self.state.document
         location = self.state_machine.get_source_and_line(self.lineno)
 
-        linespec = self.options.get("emphasize-lines")
-        if linespec:
+        if linespec := self.options.get("emphasize-lines"):
             try:
                 nlines = len(code.split("\n"))
                 hl_lines = parselinenos(linespec, nlines)
@@ -168,8 +167,7 @@ class BokehJSContent(CodeBlock):
             extra_args["linenostart"] = self.options["lineno-start"]
         set_source_info(self, literal)
 
-        caption = self.options.get("caption")
-        if caption:
+        if caption := self.options.get("caption"):
             try:
                 literal = container_wrapper(self, literal, caption)
             except ValueError as exc:
@@ -190,26 +188,23 @@ class BokehJSContent(CodeBlock):
         if js_file:
             log.debug(f"[bokehjs-content] handling external example in {self.env.docname!r}: {js_file}")
             path = js_file
-            if not js_file.startswith("/"):
+            if not path.startswith("/"):
                 path = join(self.env.app.srcdir, path)
-            js_source = open(path).read()
+            return open(path).read()
         else:
             log.debug(f"[bokehjs-content] handling inline example in {self.env.docname!r}")
-            js_source = "\n".join(self.content)
-
-        return js_source
+            return "\n".join(self.content)
 
     def get_code_language(self):
         """
         This is largely copied from bokeh.sphinxext.bokeh_plot.run
         """
         js_source = self.get_js_source()
-        if self.options.get("include_html", False):
-            resources = get_sphinx_resources(include_bokehjs_api=True)
-            html_source = BJS_HTML.render(css_files=resources.css_files, js_files=resources.js_files, hashes=resources.hashes, bjs_script=js_source)
-            return [html_source, "html"]
-        else:
+        if not self.options.get("include_html", False):
             return [js_source, "javascript"]
+        resources = get_sphinx_resources(include_bokehjs_api=True)
+        html_source = BJS_HTML.render(css_files=resources.css_files, js_files=resources.js_files, hashes=resources.hashes, bjs_script=js_source)
+        return [html_source, "html"]
 
     def run(self):
         rst_source = self.state_machine.node.document["source"]

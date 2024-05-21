@@ -56,7 +56,7 @@ class Include(PropertyDescriptorFactory[T]):
 
         self.delegate = delegate
         self.help = help
-        self.prefix = prefix + "_" if prefix else ""
+        self.prefix = f"{prefix}_" if prefix else ""
 
     def make_descriptors(self, _base_name: str) -> list[PropertyDescriptor[T]]:
         descriptors = []

@@ -129,7 +129,7 @@ class SessionHandler(AuthRequestHandler):
 
             arguments = {} if self.request.arguments is None else self.request.arguments
             payload = {'headers': headers, 'cookies': cookies, 'arguments': arguments}
-            payload.update(self.application_context.application.process_request(self.request))
+            payload |= self.application_context.application.process_request(self.request)
             token = generate_jwt_token(session_id,
                                        secret_key=app.secret_key,
                                        signed=app.sign_sessions,
@@ -142,9 +142,9 @@ class SessionHandler(AuthRequestHandler):
             log.error("Session id had invalid signature: %r", session_id)
             raise HTTPError(status_code=403, reason="Invalid token or session ID")
 
-        session = await self.application_context.create_session_if_needed(session_id, self.request, token)
-
-        return session
+        return await self.application_context.create_session_if_needed(
+            session_id, self.request, token
+        )
 
 #-----------------------------------------------------------------------------
 # Private API

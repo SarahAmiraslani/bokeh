@@ -237,14 +237,12 @@ def enumeration(*values: Any, case_sensitive: bool = True, quote: bool = False) 
     if len(values) != len(set(values)):
         raise ValueError(f"enumeration items must be unique, got {nice_join(values)}")
 
-    attrs: dict[str, Any] = {value: value for value in values}
-    attrs.update({
+    attrs: dict[str, Any] = {value: value for value in values} | {
         "_values": list(values),
         "_default": values[0],
         "_case_sensitive": case_sensitive,
         "_quote": quote,
-    })
-
+    }
     return type("Enumeration", (Enumeration,), attrs)()
 
 #: Alignment (vertical or horizontal) of a child item

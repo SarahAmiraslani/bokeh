@@ -57,17 +57,18 @@ def _collect() -> list[type[Subcommand]]:
             continue
 
         modname = file.rstrip(".py")
-        mod = import_module("." + modname, __package__)
+        mod = import_module(f".{modname}", __package__)
 
         for name in dir(mod):
             attr = getattr(mod, name)
-            if isinstance(attr, type) and issubclass(attr, Subcommand):
-                if not getattr(attr, 'name', None): continue  # instance attribute not defined on abstract base class
+            if (
+                isinstance(attr, type)
+                and issubclass(attr, Subcommand)
+                and getattr(attr, 'name', None)
+            ):
                 results.append(attr)
 
-    results = sorted(results, key=lambda attr: attr.name)
-
-    return results
+    return sorted(results, key=lambda attr: attr.name)
 
 #-----------------------------------------------------------------------------
 # Code

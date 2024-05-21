@@ -385,8 +385,7 @@ class DocumentCallbackManager:
         if isinstance(event, ModelEvent):
             subscribed = self._subscribed_models[event.event_name].copy()
             for model_ref in subscribed:
-                model = model_ref()
-                if model:
+                if model := model_ref():
                     model._trigger_event(event)
 
         for cb in self.event_callbacks_for_event_name(event.event_name):

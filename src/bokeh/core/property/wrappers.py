@@ -469,7 +469,7 @@ class PropertyValueColumnData(PropertyValueDict):
         # For arrays is reports the actual old value. For lists, the old value
         # is actually the already updated value. This is because the method
         # self._saved_copy() makes a shallow copy.
-        for k, v in new_data.items():
+        for k in new_data:
             if isinstance(self[k], np.ndarray) or isinstance(new_data[k], np.ndarray):
                 data = np.append(self[k], new_data[k])
                 if rollover and len(data) > rollover:

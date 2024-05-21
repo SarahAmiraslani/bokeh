@@ -144,12 +144,11 @@ def OutputDocumentFor(objs: Sequence[Model], apply_theme: Theme | type[FromCurdo
             _dispose_temp_doc(objs)
         doc = _create_temp_doc(objs)
     else:
-        if len(docs) == 0:
+        if not docs:
             doc = _new_doc()
             for model in objs:
                 doc.add_root(model)
 
-        # handle a single shared document
         elif len(docs) == 1:
             doc = docs.pop()
 
@@ -159,10 +158,6 @@ def OutputDocumentFor(objs: Sequence[Model], apply_theme: Theme | type[FromCurdo
                     _dispose_temp_doc(objs)
                 doc = _create_temp_doc(objs)
 
-            # we are using all the roots of a single doc, just use doc as-is
-            pass  # lgtm [py/unnecessary-pass]
-
-        # models have mixed docs, just make a quick clone
         else:
             def finish():
                 _dispose_temp_doc(objs)
@@ -186,7 +181,7 @@ class RenderItem:
             raise ValueError("either docid or sessionid must be provided")
 
         if roots is None:
-            roots = dict()
+            roots = {}
         elif isinstance(roots, list):
             roots = {root: make_globally_unique_id() for root in roots}
 
@@ -217,10 +212,11 @@ class RenderItem:
         return json
 
     def __eq__(self, other: Any) -> bool:
-        if not isinstance(other, self.__class__):
-            return False
-        else:
-            return self.to_json() == other.to_json()
+        return (
+            self.to_json() == other.to_json()
+            if isinstance(other, self.__class__)
+            else False
+        )
 
 
 @dataclass
@@ -254,7 +250,7 @@ class RenderRoots:
         self._roots = roots
 
     def __iter__(self) -> Iterator[RenderRoot]:
-        for i in range(0, len(self)):
+        for i in range(len(self)):
             yield self[i]
 
     def __len__(self):
@@ -315,7 +311,7 @@ def standalone_docs_json_and_render_items(models: Model | Document | Sequence[Mo
                 raise ValueError("A Bokeh Model must be part of a Document to render as standalone content")
 
         if doc not in docs:
-            docs[doc] = (make_globally_unique_id(), dict())
+            docs[doc] = make_globally_unique_id(), {}
 
         (docid, roots) = docs[doc]
 
@@ -325,27 +321,22 @@ def standalone_docs_json_and_render_items(models: Model | Document | Sequence[Mo
             for model in doc.roots:
                 roots[model] = make_globally_unique_css_safe_id()
 
-    docs_json: dict[ID, DocJson] = {}
-    for doc, (docid, _) in docs.items():
-        docs_json[docid] = doc.to_json(deferred=False)
-
-    render_items: list[RenderItem] = []
-    for _, (docid, roots) in docs.items():
-        render_items.append(RenderItem(docid, roots=roots))
-
+    docs_json: dict[ID, DocJson] = {
+        docid: doc.to_json(deferred=False) for doc, (docid, _) in docs.items()
+    }
+    render_items: list[RenderItem] = [
+        RenderItem(docid, roots=roots) for docid, roots in docs.values()
+    ]
     return (docs_json, render_items)
 
 def submodel_has_python_callbacks(models: Sequence[Model | Document]) -> bool:
     ''' Traverses submodels to check for Python (event) callbacks
 
     '''
-    has_python_callback = False
-    for model in collect_models(models):
-        if len(model._callbacks) > 0 or len(model._event_callbacks) > 0:
-            has_python_callback = True
-            break
-
-    return has_python_callback
+    return any(
+        len(model._callbacks) > 0 or len(model._event_callbacks) > 0
+        for model in collect_models(models)
+    )
 
 def is_tex_string(text: str) -> bool:
     ''' Whether a string begins and ends with MathJax default delimiters

@@ -81,7 +81,7 @@ def _read_data(name: str) -> StockData:
     '''
 
     '''
-    filename = external_path(name + '.csv')
+    filename = external_path(f'{name}.csv')
     data = StockData(
         date = [],
         open = [],

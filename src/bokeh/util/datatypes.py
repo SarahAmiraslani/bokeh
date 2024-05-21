@@ -96,14 +96,13 @@ class MultiValuedDict(Generic[K, V]):
 
         '''
         existing = self._dict.get(k)
-        if isinstance(existing, set):
-            existing = cast(Set[V], existing)
-            if len(existing) == 1:
-                return next(iter(existing))
-            else:
-                raise ValueError(f"{duplicate_error}: {existing!r}")
-        else:
+        if not isinstance(existing, set):
             return existing
+        existing = cast(Set[V], existing)
+        if len(existing) == 1:
+            return next(iter(existing))
+        else:
+            raise ValueError(f"{duplicate_error}: {existing!r}")
 
     def remove_value(self, key: K, value: V) -> None:
         '''

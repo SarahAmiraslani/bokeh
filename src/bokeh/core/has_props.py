@@ -200,7 +200,7 @@ class MetaHasProps(type):
 
         return super().__new__(cls, class_name, bases, class_dict)
 
-    def __init__(cls, class_name: str, bases: tuple[type, ...], _) -> None:
+    def __init__(self, class_name: str, bases: tuple[type, ...], _) -> None:
         # HasProps itself may not have any properties defined
         if class_name == "HasProps":
             return
@@ -208,19 +208,22 @@ class MetaHasProps(type):
         # Check for improperly redeclared a Property attribute.
         base_properties: dict[str, Any] = {}
         for base in (x for x in bases if issubclass(x, HasProps)):
-            base_properties.update(base.properties(_with_props=True))
+            base_properties |= base.properties(_with_props=True)
         own_properties = {k: v for k, v in cls.__dict__.items() if isinstance(v, PropertyDescriptor)}
-        redeclared = own_properties.keys() & base_properties.keys()
-        if redeclared:
-            warn(f"Properties {redeclared!r} in class {cls.__name__} were previously declared on a parent "
-                 "class. It never makes sense to do this. Redundant properties should be deleted here, or on "
-                 "the parent class. Override() can be used to change a default value of a base class property.",
-                 RuntimeWarning)
+        if redeclared := own_properties.keys() & base_properties.keys():
+            warn(
+                f"Properties {redeclared!r} in class {self.__name__} were previously declared on a parent class. It never makes sense to do this. Redundant properties should be deleted here, or on the parent class. Override() can be used to change a default value of a base class property.",
+                RuntimeWarning,
+            )
 
-        # Check for no-op Overrides
-        unused_overrides = cls.__overridden_defaults__.keys() - cls.properties(_with_props=True).keys()
-        if unused_overrides:
-            warn(f"Overrides of {unused_overrides} in class {cls.__name__} does not override anything.", RuntimeWarning)
+        if (
+            unused_overrides := self.__overridden_defaults__.keys()
+            - self.properties(_with_props=True).keys()
+        ):
+            warn(
+                f"Overrides of {unused_overrides} in class {self.__name__} does not override anything.",
+                RuntimeWarning,
+            )
 
     @property
     def model_class_reverse_map(cls) -> dict[str, type[HasProps]]:
@@ -391,10 +394,11 @@ class HasProps(Serializable, metaclass=MetaHasProps):
             True, if properties are structurally equal, otherwise False
 
         '''
-        if not isinstance(other, self.__class__):
-            return False
-        else:
-            return self.properties_with_values() == other.properties_with_values()
+        return (
+            self.properties_with_values() == other.properties_with_values()
+            if isinstance(other, self.__class__)
+            else False
+        )
 
     def to_serializable(self, serializer: Serializer) -> ObjectRep:
         rep = ObjectRep(
@@ -403,9 +407,9 @@ class HasProps(Serializable, metaclass=MetaHasProps):
         )
 
         properties = self.properties_with_values(include_defaults=False)
-        attributes = {key: serializer.encode(val) for key, val in properties.items()}
-
-        if attributes:
+        if attributes := {
+            key: serializer.encode(val) for key, val in properties.items()
+        }:
             rep["attributes"] = attributes
 
         return rep
@@ -495,7 +499,7 @@ class HasProps(Serializable, metaclass=MetaHasProps):
 
         '''
         attr = getattr(cls, name, None)
-        if attr is not None or (attr is None and not raises):
+        if attr is not None or not raises:
             return attr
         raise AttributeError(f"{cls.__name__}.{name} property descriptor does not exist")
 
@@ -525,12 +529,9 @@ class HasProps(Serializable, metaclass=MetaHasProps):
         '''
         props: dict[str, Property[Any]] = {}
         for c in reversed(cls.__mro__):
-            props.update(getattr(c, "__properties__", {}))
+            props |= getattr(c, "__properties__", {})
 
-        if not _with_props:
-            return set(props)
-
-        return props
+        return props if _with_props else set(props)
 
     @classmethod
     @lru_cache(None)
@@ -602,7 +603,7 @@ class HasProps(Serializable, metaclass=MetaHasProps):
         '''
         defaults: dict[str, Any] = {}
         for c in reversed(cls.__mro__):
-            defaults.update(getattr(c, "__overridden_defaults__", {}))
+            defaults |= getattr(c, "__overridden_defaults__", {})
         return defaults
 
     def query_properties_with_values(self, query: Callable[[PropertyDescriptor[Any]], bool], *,
@@ -659,9 +660,13 @@ class HasProps(Serializable, metaclass=MetaHasProps):
                 if key not in selected_keys:
                     continue
 
-                if not include_defaults and key not in themed_keys:
-                    if isinstance(value, PropertyValueContainer) and key in self._unstable_default_values:
-                        continue
+                if (
+                    not include_defaults
+                    and key not in themed_keys
+                    and isinstance(value, PropertyValueContainer)
+                    and key in self._unstable_default_values
+                ):
+                    continue
 
             result[key] = value
 
@@ -706,18 +711,17 @@ class HasProps(Serializable, metaclass=MetaHasProps):
         if old_dict is not None:
             removed.update(set(old_dict.keys()))
         added = set(property_values.keys())
-        old_values: dict[str, Any] = {}
-        for k in added.union(removed):
-            old_values[k] = getattr(self, k)
-
-        if len(property_values) > 0:
+        old_values: dict[str, Any] = {
+            k: getattr(self, k) for k in added.union(removed)
+        }
+        if property_values:
             setattr(self, '__themed_values__', property_values)
         elif hasattr(self, '__themed_values__'):
             delattr(self, '__themed_values__')
 
         # Property container values might be cached even if unmodified. Invalidate
         # any cached values that are not modified at this point.
-        for k, v in old_values.items():
+        for k in old_values:
             if k in self._unstable_themed_values:
                 del self._unstable_themed_values[k]
 
@@ -777,7 +781,7 @@ def _HasProps_to_serializable(cls: type[HasProps], serializer: Serializer) -> Re
 
     # TODO: consider supporting mixin models
     bases: list[type[HasProps]] = [ base for base in cls.__bases__ if issubclass(base, Model) and base != DataModel ]
-    if len(bases) == 0:
+    if not bases:
         extends = None
     elif len(bases) == 1:
         [base] = bases
@@ -788,10 +792,10 @@ def _HasProps_to_serializable(cls: type[HasProps], serializer: Serializer) -> Re
     properties: list[PropertyDef] = []
     overrides: list[OverrideDef] = []
 
+    kind = "Any" # TODO: serialize kinds
     # TODO: don't use unordered sets
     for prop_name in cls.__properties__:
         descriptor = cls.lookup(prop_name)
-        kind = "Any" # TODO: serialize kinds
         default = descriptor.property._default
 
         if default is Undefined:
@@ -804,9 +808,12 @@ def _HasProps_to_serializable(cls: type[HasProps], serializer: Serializer) -> Re
 
         properties.append(prop_def)
 
-    for prop_name, default in getattr(cls, "__overridden_defaults__", {}).items():
-        overrides.append(OverrideDef(name=prop_name, default=serializer.encode(default)))
-
+    overrides.extend(
+        OverrideDef(name=prop_name, default=serializer.encode(default))
+        for prop_name, default in getattr(
+            cls, "__overridden_defaults__", {}
+        ).items()
+    )
     modeldef = ModelDef(
         type="model",
         name=cls.__qualified_model__,

@@ -63,12 +63,12 @@ def deprecated(since_or_msg: Version | str,
         since = f"{major}.{minor}.{patch}"
         message = f"{old!r} was deprecated in Bokeh {since} and will be removed, use {new!r} instead."
         if extra is not None:
-            message += " " + extra.strip()
-    else:
-        if not (old is None and new is None and extra is None):
-            raise ValueError("deprecated(message) signature doesn't allow extra arguments")
-
+            message += f" {extra.strip()}"
+    elif old is None and new is None and extra is None:
         message = since_or_msg
+
+    else:
+        raise ValueError("deprecated(message) signature doesn't allow extra arguments")
 
     warn(message, BokehDeprecationWarning)
 

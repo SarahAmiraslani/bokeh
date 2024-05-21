@@ -59,8 +59,10 @@ def html_repr(obj: Model):
 
     def row(c: str):
         return f'<div style="display: table-row;">{c}</div>'
+
     def hidden_row(c: str):
         return f'<div class="{cls_name}" style="display: none;">{c}</div>'
+
     def cell(c: str):
         return f'<div style="display: table-cell;">{c}</div>'
 
@@ -78,7 +80,7 @@ def html_repr(obj: Model):
     all_props = sorted_props
     for i, (prop, value) in enumerate(all_props):
         end = ')' if i == len(all_props)-1 else ','
-        html += hidden_row(cell("") + cell(prop + '&nbsp;=&nbsp;' + repr(value) + end))
+        html += hidden_row(cell("") + cell(f'{prop}&nbsp;=&nbsp;{repr(value)}{end}'))
 
     html += '</div>'
     html += _HTML_REPR % dict(ellipsis_id=ellipsis_id, cls_name=cls_name)

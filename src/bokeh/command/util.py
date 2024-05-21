@@ -130,16 +130,16 @@ def build_single_handler_application(path: str, argv: list[str] | None = None) -
                 warn(DIRSTYLE_MAIN_WARNING)
             handler = ScriptHandler(filename=path, argv=argv)
         else:
-            raise ValueError("Expected a '.py' script or '.ipynb' notebook, got: '%s'" % path)
+            raise ValueError(
+                f"Expected a '.py' script or '.ipynb' notebook, got: '{path}'"
+            )
     else:
-        raise ValueError("Path for Bokeh server application does not exist: %s" % path)
+        raise ValueError(f"Path for Bokeh server application does not exist: {path}")
 
     if handler.failed:
         raise RuntimeError(f"Error loading {path}:\n\n{handler.error}\n{handler.error_detail} ")
 
-    application = Application(handler)
-
-    return application
+    return Application(handler)
 
 def build_single_handler_applications(paths: list[str], argvs: dict[str, list[str]] | None = None) -> dict[str, Application]:
     ''' Return a dictionary mapping routes to Bokeh applications built using
@@ -173,7 +173,7 @@ def build_single_handler_applications(paths: list[str], argvs: dict[str, list[st
 
         if not route:
             if '/' in applications:
-                raise RuntimeError("Don't know the URL path to use for %s" % (path))
+                raise RuntimeError(f"Don't know the URL path to use for {path}")
             route = '/'
         applications[route] = application
 

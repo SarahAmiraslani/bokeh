@@ -98,7 +98,7 @@ class Struct(ParameterizedProperty[T]):
                 else:
                     return
 
-        msg = "" if not detail else f"expected an element of {self}, got {value!r}"
+        msg = f"expected an element of {self}, got {value!r}" if detail else ""
         raise ValueError(msg)
 
     def __str__(self) -> str:

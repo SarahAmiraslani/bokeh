@@ -2,6 +2,7 @@
 This example shows the capability of exporting a csv file from ColumnDataSource.
 
 '''
+
 from os.path import dirname, join
 from pathlib import Path
 
@@ -14,7 +15,7 @@ from bokeh.models import (Button, ColumnDataSource, CustomJS, DataTable,
 
 df = pd.read_csv(join(dirname(__file__), 'salary_data.csv'))
 
-source = ColumnDataSource(data=dict())
+source = ColumnDataSource(data={})
 
 def update():
     current = df[(df['salary'] >= slider.value[0]) & (df['salary'] <= slider.value[1])].dropna()

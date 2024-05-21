@@ -261,7 +261,7 @@ class Application:
         '''
         request_data: dict[str, Any] = {}
         for h in self._handlers:
-            request_data.update(h.process_request(request))
+            request_data |= h.process_request(request)
         return request_data
 
 

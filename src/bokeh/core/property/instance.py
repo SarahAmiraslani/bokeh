@@ -117,7 +117,11 @@ class Object(Property[T]):
 
         instance_type = self.instance_type.__name__
         value_type = type(value).__name__
-        msg = "" if not detail else f"expected an instance of type {instance_type}, got {value} of type {value_type}"
+        msg = (
+            f"expected an instance of type {instance_type}, got {value} of type {value_type}"
+            if detail
+            else ""
+        )
         raise ValueError(msg)
 
     def _may_have_unstable_default(self):

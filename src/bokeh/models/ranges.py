@@ -461,9 +461,10 @@ class FactorRange(Range):
 
     @error(DUPLICATE_FACTORS)
     def _check_duplicate_factors(self):
-        dupes = [item for item, count in Counter(self.factors).items() if count > 1]
-        if dupes:
-            return "duplicate factors found: %s" % ', '.join(repr(x) for x in dupes)
+        if dupes := [
+            item for item, count in Counter(self.factors).items() if count > 1
+        ]:
+            return f"duplicate factors found: {', '.join(repr(x) for x in dupes)}"
 
 #-----------------------------------------------------------------------------
 # Dev API

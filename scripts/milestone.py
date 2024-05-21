@@ -39,7 +39,7 @@ def query_github(query, token):
         print(f"error: {path}: {msg}", file=sys.stderr)
     if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
         logging.debug(f"Response {response.status_code}: {response.text}")
-    return response.json()["data"] if not errors else None
+    return None if errors else response.json()["data"]
 
 
 def get_labels(data):
@@ -51,10 +51,14 @@ def get_labels(data):
 
 def get_label_for(data, kind):
     labels = get_labels(data)
-    for label in labels:
-        if label.startswith(kind):
-            return label.replace(kind, "")
-    return None
+    return next(
+        (
+            label.replace(kind, "")
+            for label in labels
+            if label.startswith(kind)
+        ),
+        None,
+    )
 
 
 def get_label_type(data):
@@ -76,7 +80,7 @@ def description(data):
 
     """
     component = get_label_component(data)
-    component_str = "" if not component else f"[component: {component}] "
+    component_str = f"[component: {component}] " if component else ""
     return f'#{data["node"]["number"]} {component_str}{data["node"]["title"]}'
 
 
@@ -312,9 +316,7 @@ def main(milestone, log_level, verbose, check_only, allow_closed):
 
     CHANGELOG = REPO_ROOT / "docs" / "CHANGELOG"
 
-    with open(CHANGELOG) as f:
-        old_changelog = f.read()
-
+    old_changelog = Path(CHANGELOG).read_text()
     out = open(CHANGELOG, mode="w")
 
     out.write(f"{datetime.date.today()} {milestone:>8}:\n")
@@ -326,10 +328,10 @@ def main(milestone, log_level, verbose, check_only, allow_closed):
             out.write("  * bugfixes:\n")
         elif group_type == "feature":
             out.write("  * features:\n")
-        elif group_type == "task":
-            out.write("  * tasks:\n")
         elif group_type == "none":
             continue
+        elif group_type == "task":
+            out.write("  * tasks:\n")
         for item in group:
             out.write(f"    - {description(item)}\n")
         out.write("\n")

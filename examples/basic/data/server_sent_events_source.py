@@ -57,8 +57,9 @@ def stream():
             x = v*np.sin(t)
             y = v*np.cos(t)
             data = [[x, y]]
-            yield "data: "+json.dumps(data)+"\n\n"
+            yield f"data: {json.dumps(data)}" + "\n\n"
             sleep(0.1)
+
     resp = Response(event_stream(), mimetype="text/event-stream")
     resp.headers['Cache-Control'] = 'no-cache'
     return resp

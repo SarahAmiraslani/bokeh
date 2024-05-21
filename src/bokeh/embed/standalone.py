@@ -481,13 +481,14 @@ def _title_from_models(models: Sequence[Model | Document], title: str | None) ->
         if isinstance(p, Document):
             return p.title
 
-    # use title from any model's document
-    for p in cast(Sequence[Model], models):
-        if p.document is not None:
-            return p.document.title
-
-    # use default title
-    return DEFAULT_TITLE
+    return next(
+        (
+            p.document.title
+            for p in cast(Sequence[Model], models)
+            if p.document is not None
+        ),
+        DEFAULT_TITLE,
+    )
 
 #-----------------------------------------------------------------------------
 # Code

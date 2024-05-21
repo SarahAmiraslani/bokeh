@@ -215,13 +215,12 @@ class _BokehStructureGraph:
         obj_dict = obj.properties_with_values()
         types = [obj.lookup(x) for x in obj_dict.keys()]
         docs = [getattr(type(obj), x).__doc__ for x in obj_dict.keys()]
-        df = {
+        return {
             "props": list(obj_dict.keys()),
             "values": list(obj_dict.values()),
             "types": types,
             "doc": docs,
         }
-        return df
 
     def _make_graph_plot(self) -> Plot:
         """ Builds the graph portion of the final model.
@@ -370,5 +369,4 @@ class _BokehStructureGraph:
         )
 
         self._node_source.selected.js_on_change("indices", js)
-        layout = column(self._graph_plot, self._data_table)
-        return layout
+        return column(self._graph_plot, self._data_table)

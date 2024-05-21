@@ -99,13 +99,12 @@ class DashPattern(Either):
     def transform(self, value):
         value = super().transform(value)
 
-        if isinstance(value, str):
-            try:
-                return self._dash_patterns[value]
-            except KeyError:
-                return [int(x) for x in  value.split()]
-        else:
+        if not isinstance(value, str):
             return value
+        try:
+            return self._dash_patterns[value]
+        except KeyError:
+            return [int(x) for x in  value.split()]
 
 class FontSize(String):
 
@@ -116,10 +115,10 @@ class FontSize(String):
 
         if isinstance(value, str):
             if len(value) == 0:
-                msg = "" if not detail else "empty string is not a valid font size value"
+                msg = "empty string is not a valid font size value" if detail else ""
                 raise ValueError(msg)
             elif not self._font_size_re.match(value):
-                msg = "" if not detail else f"{value!r} is not a valid font size value"
+                msg = f"{value!r} is not a valid font size value" if detail else ""
                 raise ValueError(msg)
 
 class HatchPatternType(Either):
@@ -158,11 +157,19 @@ class Image(Property):
         if isinstance(value, (str, Path, PIL.Image.Image)):
             return
 
-        if isinstance(value, np.ndarray):
-            if value.dtype == "uint8" and len(value.shape) == 3 and value.shape[2] in (3, 4):
-                return
+        if (
+            isinstance(value, np.ndarray)
+            and value.dtype == "uint8"
+            and len(value.shape) == 3
+            and value.shape[2] in (3, 4)
+        ):
+            return
 
-        msg = "" if not detail else f"invalid value: {value!r}; allowed values are string filenames, PIL.Image.Image instances, or RGB(A) NumPy arrays"
+        msg = (
+            f"invalid value: {value!r}; allowed values are string filenames, PIL.Image.Image instances, or RGB(A) NumPy arrays"
+            if detail
+            else ""
+        )
         raise ValueError(msg)
 
     def transform(self, value):
@@ -238,7 +245,11 @@ class MinMaxBounds(Either):
         if value[0] < value[1]:
             return
 
-        msg = "" if not detail else "Invalid bounds: maximum smaller than minimum. Correct usage: bounds=(min, max)"
+        msg = (
+            "Invalid bounds: maximum smaller than minimum. Correct usage: bounds=(min, max)"
+            if detail
+            else ""
+        )
         raise ValueError(msg)
 
 class MarkerType(Enum):

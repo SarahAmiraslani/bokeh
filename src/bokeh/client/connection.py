@@ -126,9 +126,11 @@ class ClientConnection:
     @property
     def error_reason(self) -> ErrorReason | None:
         ''' The reason of the connection loss encoded as a ``DISCONNECTED.ErrorReason`` enum value '''
-        if not isinstance(self._state, DISCONNECTED):
-            return None
-        return self._state.error_reason
+        return (
+            self._state.error_reason
+            if isinstance(self._state, DISCONNECTED)
+            else None
+        )
 
     @property
     def error_code(self) -> int | None:
@@ -136,9 +138,7 @@ class ClientConnection:
         the error code. None otherwise.
 
         '''
-        if not isinstance(self._state, DISCONNECTED):
-            return 0
-        return self._state.error_code
+        return self._state.error_code if isinstance(self._state, DISCONNECTED) else 0
 
     @property
     def error_detail(self) -> str:
@@ -146,9 +146,11 @@ class ClientConnection:
         the error detail. Empty string otherwise.
 
         '''
-        if not isinstance(self._state, DISCONNECTED):
-            return ""
-        return self._state.error_detail
+        return (
+            self._state.error_detail
+            if isinstance(self._state, DISCONNECTED)
+            else ""
+        )
 
     # Internal methods --------------------------------------------------------
 
@@ -331,7 +333,7 @@ class ClientConnection:
             self._loop.stop()
             return None
         else:
-            log.debug("Running state " + self._state.__class__.__name__)
+            log.debug(f"Running state {self._state.__class__.__name__}")
             await self._state.run(self)
 
     async def _pop_message(self) -> Message[Any] | None:

@@ -42,18 +42,13 @@ providers = [
 ]
 
 plots = []
-for i, vendor_name in enumerate(providers):
+for vendor_name in providers:
     plot = figure(x_range=x_range, y_range=y_range, toolbar_location=None,
                   x_axis_type="mercator", y_axis_type="mercator",
                   height=250, width=300, title=vendor_name)
     plot.add_tile(vendor_name)
     plots.append(plot)
 
-layout = layout([
-    [description],
-    plots[0:3],
-    plots[3:6],
-    plots[6:9],
-])
+layout = layout([[description], plots[:3], plots[3:6], plots[6:9]])
 
 show(layout)

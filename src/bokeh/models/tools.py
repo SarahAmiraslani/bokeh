@@ -193,12 +193,11 @@ class Tool(Model):
         constructor = cls._known_aliases.get(name)
         if constructor is not None:
             return constructor()
-        else:
-            known_names = cls._known_aliases.keys()
-            matches, text = difflib.get_close_matches(name.lower(), known_names), "similar"
-            if not matches:
-                matches, text = known_names, "possible"
-            raise ValueError(f"unexpected tool name '{name}', {text} tools are {nice_join(matches)}")
+        known_names = cls._known_aliases.keys()
+        matches, text = difflib.get_close_matches(name.lower(), known_names), "similar"
+        if not matches:
+            matches, text = known_names, "possible"
+        raise ValueError(f"unexpected tool name '{name}', {text} tools are {nice_join(matches)}")
 
     @classmethod
     def register_alias(cls, name: str, constructor: tp.Callable[[], Tool]) -> None:
@@ -1474,7 +1473,7 @@ class PolyTool(EditTool):
             return
         glyph = self.vertex_renderer.glyph
         if not isinstance(glyph, XYGlyph):
-            return "glyph type %s found." % type(glyph).__name__
+            return f"glyph type {type(glyph).__name__} found."
 
 class BoxEditTool(EditTool, Drag, Tap):
     ''' *toolbar icon*: |box_edit_icon|
@@ -1537,13 +1536,13 @@ class BoxEditTool(EditTool, Drag, Tap):
 
     @error(INCOMPATIBLE_BOX_EDIT_RENDERER)
     def _check_compatible_renderers(self):
-        incompatible_renderers = []
-        for renderer in self.renderers:
-            if not isinstance(renderer.glyph, Rect):
-                incompatible_renderers.append(renderer)
-        if incompatible_renderers:
+        if incompatible_renderers := [
+            renderer
+            for renderer in self.renderers
+            if not isinstance(renderer.glyph, Rect)
+        ]:
             glyph_types = ', '.join(type(renderer.glyph).__name__ for renderer in incompatible_renderers)
-            return "%s glyph type(s) found." % glyph_types
+            return f"{glyph_types} glyph type(s) found."
 
 class PointDrawTool(EditTool, Drag, Tap):
     ''' *toolbar icon*: |point_draw_icon|
@@ -1602,13 +1601,13 @@ class PointDrawTool(EditTool, Drag, Tap):
 
     @error(INCOMPATIBLE_POINT_DRAW_RENDERER)
     def _check_compatible_renderers(self):
-        incompatible_renderers = []
-        for renderer in self.renderers:
-            if not isinstance(renderer.glyph, XYGlyph):
-                incompatible_renderers.append(renderer)
-        if incompatible_renderers:
+        if incompatible_renderers := [
+            renderer
+            for renderer in self.renderers
+            if not isinstance(renderer.glyph, XYGlyph)
+        ]:
             glyph_types = ', '.join(type(renderer.glyph).__name__ for renderer in incompatible_renderers)
-            return "%s glyph type(s) found." % glyph_types
+            return f"{glyph_types} glyph type(s) found."
 
 class PolyDrawTool(PolyTool, Drag, Tap):
     ''' *toolbar icon*: |poly_draw_icon|
@@ -1663,13 +1662,13 @@ class PolyDrawTool(PolyTool, Drag, Tap):
 
     @error(INCOMPATIBLE_POLY_DRAW_RENDERER)
     def _check_compatible_renderers(self):
-        incompatible_renderers = []
-        for renderer in self.renderers:
-            if not isinstance(renderer.glyph, (MultiLine, Patches)):
-                incompatible_renderers.append(renderer)
-        if incompatible_renderers:
+        if incompatible_renderers := [
+            renderer
+            for renderer in self.renderers
+            if not isinstance(renderer.glyph, (MultiLine, Patches))
+        ]:
             glyph_types = ', '.join(type(renderer.glyph).__name__ for renderer in incompatible_renderers)
-            return "%s glyph type(s) found." % glyph_types
+            return f"{glyph_types} glyph type(s) found."
 
 class FreehandDrawTool(EditTool, Drag, Tap):
     ''' *toolbar icon*: |freehand_draw_icon|
@@ -1708,13 +1707,13 @@ class FreehandDrawTool(EditTool, Drag, Tap):
 
     @error(INCOMPATIBLE_POLY_DRAW_RENDERER)
     def _check_compatible_renderers(self):
-        incompatible_renderers = []
-        for renderer in self.renderers:
-            if not isinstance(renderer.glyph, (MultiLine, Patches)):
-                incompatible_renderers.append(renderer)
-        if incompatible_renderers:
+        if incompatible_renderers := [
+            renderer
+            for renderer in self.renderers
+            if not isinstance(renderer.glyph, (MultiLine, Patches))
+        ]:
             glyph_types = ', '.join(type(renderer.glyph).__name__ for renderer in incompatible_renderers)
-            return "%s glyph type(s) found." % glyph_types
+            return f"{glyph_types} glyph type(s) found."
 
 class PolyEditTool(PolyTool, Drag, Tap):
     ''' *toolbar icon*: |poly_edit_icon|
@@ -1755,14 +1754,14 @@ class PolyEditTool(PolyTool, Drag, Tap):
 
     @error(INCOMPATIBLE_POLY_EDIT_RENDERER)
     def _check_compatible_renderers(self):
-        incompatible_renderers = []
-        for renderer in self.renderers:
-            if not isinstance(renderer.glyph, (MultiLine, Patches)):
-                incompatible_renderers.append(renderer)
-        if incompatible_renderers:
+        if incompatible_renderers := [
+            renderer
+            for renderer in self.renderers
+            if not isinstance(renderer.glyph, (MultiLine, Patches))
+        ]:
             glyph_types = ', '.join(type(renderer.glyph).__name__
                                     for renderer in incompatible_renderers)
-            return "%s glyph type(s) found." % glyph_types
+            return f"{glyph_types} glyph type(s) found."
 
 
 class LineEditTool(EditTool, Drag, Tap):
@@ -1810,18 +1809,18 @@ class LineEditTool(EditTool, Drag, Tap):
     def _check_compatible_intersection_renderer(self):
         glyph = self.intersection_renderer.glyph
         if not isinstance(glyph, LineGlyph):
-            return "glyph type %s found." % type(glyph).__name__
+            return f"glyph type {type(glyph).__name__} found."
 
     @error(INCOMPATIBLE_LINE_EDIT_RENDERER)
     def _check_compatible_renderers(self):
-        incompatible_renderers = []
-        for renderer in self.renderers:
-            if not isinstance(renderer.glyph, (Line,)):
-                incompatible_renderers.append(renderer)
-        if incompatible_renderers:
+        if incompatible_renderers := [
+            renderer
+            for renderer in self.renderers
+            if not isinstance(renderer.glyph, (Line,))
+        ]:
             glyph_types = ', '.join(type(renderer.glyph).__name__
                                     for renderer in incompatible_renderers)
-            return "%s glyph type(s) found." % glyph_types
+            return f"{glyph_types} glyph type(s) found."
 
 #
 #-----------------------------------------------------------------------------

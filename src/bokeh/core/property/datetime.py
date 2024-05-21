@@ -62,7 +62,7 @@ class Date(Property[Union[str, datetime.date]]):
 
         # datetime.datetime is datetime.date, exclude manually up front
         if isinstance(value, datetime.datetime):
-            msg = "" if not detail else "Expected a date value, got a datetime.datetime"
+            msg = "Expected a date value, got a datetime.datetime" if detail else ""
             raise ValueError(msg)
 
         if isinstance(value, datetime.date):
@@ -71,7 +71,7 @@ class Date(Property[Union[str, datetime.date]]):
         try:
             datetime.datetime.fromisoformat(value)
         except Exception:
-            msg = "" if not detail else f"Expected an ISO date string, got {value!r}"
+            msg = f"Expected an ISO date string, got {value!r}" if detail else ""
             raise ValueError(msg)
 
 class Datetime(Property[Union[str, datetime.date, datetime.datetime]]):
@@ -113,7 +113,11 @@ class Datetime(Property[Union[str, datetime.date, datetime.datetime]]):
             except Exception:
                 pass
 
-        msg = "" if not detail else f"Expected a date, datetime object, or timestamp, got {value!r}"
+        msg = (
+            f"Expected a date, datetime object, or timestamp, got {value!r}"
+            if detail
+            else ""
+        )
         raise ValueError(msg)
 
     @staticmethod
@@ -141,7 +145,11 @@ class Time(Property[Union[str, datetime.time]]):
             except ValueError:
                 pass
 
-        msg = "" if not detail else f"Expected a time object, or ISO formatted time string, got {value!r}"
+        msg = (
+            f"Expected a time object, or ISO formatted time string, got {value!r}"
+            if detail
+            else ""
+        )
         raise ValueError(msg)
 
     def transform(self, value: Any) -> Any:
@@ -171,7 +179,7 @@ class TimeDelta(Property[datetime.timedelta]):
         if is_timedelta_type(value):
             return
 
-        msg = "" if not detail else f"Expected a timedelta instance, got {value!r}"
+        msg = f"Expected a timedelta instance, got {value!r}" if detail else ""
         raise ValueError(msg)
 
 #-----------------------------------------------------------------------------

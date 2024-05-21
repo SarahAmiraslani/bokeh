@@ -81,19 +81,17 @@ def banner(color: ColorFunction, msg: str) -> str:
 
 
 def _format_details(details: Sequence[str] | None = None) -> str:
-    if details:
-        return "\n" + "\n".join(f"    {line}" for line in details)
-    return ""
+    return "\n" + "\n".join(f"    {line}" for line in details) if details else ""
 
 
 def failed(msg: str, details: Sequence[str] | None = None) -> str:
     """"""
-    return f"{red('[FAIL]')} {msg}" + _format_details(details)
+    return f"{red('[FAIL]')} {msg}{_format_details(details)}"
 
 
 def passed(msg: str, details: Sequence[str] | None = None) -> str:
     """"""
-    return f"{dim(green('[PASS]'))} {msg}" + _format_details(details)
+    return f"{dim(green('[PASS]'))} {msg}{_format_details(details)}"
 
 
 def shell(cmd: str) -> str:

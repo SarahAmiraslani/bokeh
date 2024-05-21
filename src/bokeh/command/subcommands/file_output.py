@@ -82,12 +82,12 @@ class FileOutputSubcommand(Subcommand):
                     ) + FileOutputSubcommand.other_args()
 
         '''
-        return ('files', Argument(
+        return 'files', Argument(
             metavar='DIRECTORY-OR-SCRIPT',
             nargs='+',
-            help=("The app directories or scripts to generate %s for" % (output_type_name)),
-            default=None
-        ))
+            help=f"The app directories or scripts to generate {output_type_name} for",
+            default=None,
+        )
 
     @classmethod
     def other_args(cls) -> Args:
@@ -131,11 +131,7 @@ class FileOutputSubcommand(Subcommand):
         '''
 
         '''
-        if route == "/":
-            base = "index"
-        else:
-            base = route[1:]
-
+        base = "index" if route == "/" else route[1:]
         return f"{base}.{ext}"
 
     def invoke(self, args: argparse.Namespace) -> None:
@@ -145,11 +141,7 @@ class FileOutputSubcommand(Subcommand):
         argvs = { f : args.args for f in args.files}
         applications = build_single_handler_applications(args.files, argvs)
 
-        if args.output is None:
-            outputs: list[str] = []
-        else:
-            outputs = list(args.output)  # copy so we can pop from it
-
+        outputs = [] if args.output is None else list(args.output)
         if len(outputs) > len(applications):
             die("--output/-o was given too many times (%d times for %d applications)" %
                 (len(outputs), len(applications)))
@@ -157,7 +149,7 @@ class FileOutputSubcommand(Subcommand):
         for (route, app) in applications.items():
             doc = app.create_document()
 
-            if len(outputs) > 0:
+            if outputs:
                 filename = outputs.pop(0)
             else:
                 filename = self.filename_from_route(route, self.extension)

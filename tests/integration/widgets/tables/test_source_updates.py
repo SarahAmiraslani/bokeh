@@ -57,12 +57,13 @@ def _is_cds_data_patch(evt):
     return evt['kind'] == 'ModelChanged' and evt['attr'] == 'data'
 
 def has_cds_data_patches(msgs):
-    for msg in msgs:
-        if msg.msgtype == "PATCH-DOC":
-            if any(_is_cds_data_patch(evt) for evt in msg.content.get('events', [])):
-                return True
-
-    return False
+    return any(
+        msg.msgtype == "PATCH-DOC"
+        and any(
+            _is_cds_data_patch(evt) for evt in msg.content.get('events', [])
+        )
+        for msg in msgs
+    )
 
 
 @pytest.mark.selenium
@@ -296,7 +297,7 @@ class Test_DataTableSource:
 
         results = page.results
         assert results ==  {'indices': []}
-        assert set(source.selected.indices) == set()
+        assert not set(source.selected.indices)
         assert get_table_selected_rows(page.driver, table) == set()
 
         # select the third row
@@ -344,7 +345,7 @@ class Test_DataTableSource:
 
         results = page.results
         assert results ==  {'indices': []}
-        assert set(source.selected.indices) == set()
+        assert not set(source.selected.indices)
         assert get_table_selected_rows(page.driver, table) == set()
 
         # select the third row
@@ -650,7 +651,7 @@ class Test_DataTableSource:
 
         page = bokeh_server_page(modify_doc)
 
-        assert result == []
+        assert not result
 
         cell = get_table_cell(page.driver, table, 3, 2)
         assert cell.text == '20'

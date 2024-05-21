@@ -408,6 +408,7 @@ logging stats is 0 (disabled). Only positive integer values are accepted.
 
 '''
 
+
 #-----------------------------------------------------------------------------
 # Boilerplate
 #-----------------------------------------------------------------------------
@@ -455,56 +456,71 @@ SESSION_ID_MODES = ('unsigned', 'signed', 'external-signed')
 DEFAULT_LOG_FORMAT = "%(asctime)s %(message)s"
 
 base_serve_args = (
-    ('--port', Argument(
-        metavar = 'PORT',
-        type    = int,
-        help    = "Port to listen on",
-        default = DEFAULT_SERVER_PORT
-    )),
-
-    ('--address', Argument(
-        metavar = 'ADDRESS',
-        type    = str,
-        help    = "Address to listen on",
-        default = None,
-    )),
-
-    ('--unix-socket', Argument(
-        metavar = 'UNIX-SOCKET',
-        type    = str,
-        help    = "Unix socket to bind. Network options such as port, address, ssl options are incompatible with unix socket",
-        default = None,
-    )),
-
-    ('--log-level', Argument(
-        metavar = 'LOG-LEVEL',
-        action  = 'store',
-        default = None,
-        choices = LOGLEVELS + ("None", ),
-        help    = "One of: %s" % nice_join(LOGLEVELS),
-    )),
-
-    ('--log-format', Argument(
-        metavar ='LOG-FORMAT',
-        action  = 'store',
-        default = DEFAULT_LOG_FORMAT,
-        help    = "A standard Python logging format string (default: %r)" % DEFAULT_LOG_FORMAT.replace("%", "%%"),
-    )),
-
-    ('--log-file', Argument(
-        metavar ='LOG-FILE',
-        action  = 'store',
-        default = None,
-        help    = "A filename to write logs to, or None to write to the standard stream (default: None)",
-    )),
-
-    ('--use-config', Argument(
-        metavar = 'CONFIG',
-        type    = str,
-        help    = "Use a YAML config file for settings",
-        default = None,
-    )),
-
+    (
+        '--port',
+        Argument(
+            metavar='PORT',
+            type=int,
+            help="Port to listen on",
+            default=DEFAULT_SERVER_PORT,
+        ),
+    ),
+    (
+        '--address',
+        Argument(
+            metavar='ADDRESS',
+            type=str,
+            help="Address to listen on",
+            default=None,
+        ),
+    ),
+    (
+        '--unix-socket',
+        Argument(
+            metavar='UNIX-SOCKET',
+            type=str,
+            help="Unix socket to bind. Network options such as port, address, ssl options are incompatible with unix socket",
+            default=None,
+        ),
+    ),
+    (
+        '--log-level',
+        Argument(
+            metavar='LOG-LEVEL',
+            action='store',
+            default=None,
+            choices=LOGLEVELS + ("None",),
+            help=f"One of: {nice_join(LOGLEVELS)}",
+        ),
+    ),
+    (
+        '--log-format',
+        Argument(
+            metavar='LOG-FORMAT',
+            action='store',
+            default=DEFAULT_LOG_FORMAT,
+            help="A standard Python logging format string (default: %r)"
+            % DEFAULT_LOG_FORMAT.replace("%", "%%"),
+        ),
+    ),
+    (
+        '--log-file',
+        Argument(
+            metavar='LOG-FILE',
+            action='store',
+            default=None,
+            help="A filename to write logs to, or None to write to the standard stream (default: None)",
+        ),
+    ),
+    (
+        '--use-config',
+        Argument(
+            metavar='CONFIG',
+            type=str,
+            help="Use a YAML config file for settings",
+            default=None,
+        ),
+    ),
 )
 
 __all__ = (
@@ -925,15 +941,15 @@ class Serve(Subcommand):
                     if (fnmatch(name, '*.html') or
                         fnmatch(name, '*.css') or
                         fnmatch(name, '*.yaml')):
-                        log.info("Watching: " + os.path.join(path, name))
+                        log.info(f"Watching: {os.path.join(path, name)}")
                         watch(os.path.join(path, name))
 
         def add_optional_autoreload_files(file_list: list[str]) -> None:
             for filen in file_list:
                 if os.path.isdir(filen):
-                    log.warning("Cannot watch directory " + filen)
+                    log.warning(f"Cannot watch directory {filen}")
                     continue
-                log.info("Watching: " + filen)
+                log.info(f"Watching: {filen}")
                 watch(filen)
 
         if server_kwargs['autoreload']:
@@ -974,7 +990,7 @@ class Serve(Subcommand):
 
                 for route in sorted(applications.keys()):
                     url = f"{protocol}://{address_string}:{server.port}{server.prefix}{route}"
-                    log.info("Bokeh app running at: %s" % url)
+                    log.info(f"Bokeh app running at: {url}")
 
                 log.info("Starting Bokeh server with process id: %d" % os.getpid())
 

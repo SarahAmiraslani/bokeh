@@ -79,22 +79,22 @@ def write(*values: str, **kwargs: str) -> None:
 
 
 def fail(msg: str | None = None, label: str = "FAIL") -> None:
-    text = " " + msg if msg is not None else ""
+    text = f" {msg}" if msg is not None else ""
     write(red(f"[{label}]") + text)
 
 
 def info(msg: str | None = None, label: str = "INFO") -> None:
-    text = " " + msg if msg is not None else ""
+    text = f" {msg}" if msg is not None else ""
     write(white(f"[{label}]") + text)
 
 
 def ok(msg: str | None = None, label: str = "OK") -> None:
-    text = " " + msg if msg is not None else ""
+    text = f" {msg}" if msg is not None else ""
     write(green(f"[{label}]") + text)
 
 
 def warn(msg: str | None = None, label: str = "WARN") -> None:
-    text = " " + msg if msg is not None else ""
+    text = f" {msg}" if msg is not None else ""
     write(yellow(f"[{label}]") + text)
 
 #-----------------------------------------------------------------------------

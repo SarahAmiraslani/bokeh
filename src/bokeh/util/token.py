@@ -125,9 +125,7 @@ def generate_jwt_token(session_id: ID,
         payload[_TOKEN_ZLIB_KEY] = _base64_encode(compressed)
     token = _base64_encode(json.dumps(payload))
     secret_key = _ensure_bytes(secret_key)
-    if not signed:
-        return token
-    return token + '.' + _signature(token, secret_key)
+    return f'{token}.{_signature(token, secret_key)}' if signed else token
 
 def get_session_id(token: str) -> ID:
     """Extracts the session id from a JWT token.
@@ -242,9 +240,7 @@ class _BytesDecoder(json.JSONDecoder):
         super().__init__(*args, object_hook=self.bytes_object_hook, **kwargs)
 
     def bytes_object_hook(self, obj: dict[Any, Any]) -> Any:
-        if set(obj.keys()) == {"bytes"}:
-            return _base64_decode(obj["bytes"])
-        return obj
+        return _base64_decode(obj["bytes"]) if set(obj.keys()) == {"bytes"} else obj
 
 def _get_sysrandom() -> tuple[Any, bool]:
     # Use the system PRNG for session id generation (if possible)
@@ -276,8 +272,8 @@ def _ensure_bytes(secret_key: str | bytes | None) -> bytes | None:
 
 # this is broken out for unit testability
 def _reseed_if_needed(using_sysrandom: bool, secret_key: bytes | None) -> None:
-    secret_key = _ensure_bytes(secret_key)
     if not using_sysrandom:
+        secret_key = _ensure_bytes(secret_key)
         # This is ugly, and a hack, but it makes things better than
         # the alternative of predictability. This re-seeds the PRNG
         # using a value that is hard for an attacker to predict, every

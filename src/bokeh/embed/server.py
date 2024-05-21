@@ -117,14 +117,12 @@ def server_document(url: str = "default", relative_urls: bool = False, resources
 
     headers = headers or {}
 
-    tag = AUTOLOAD_REQUEST_TAG.render(
-        src_path  = src_path,
-        app_path  = app_path,
-        elementid = elementid,
-        headers   = headers,
+    return AUTOLOAD_REQUEST_TAG.render(
+        src_path=src_path,
+        app_path=app_path,
+        elementid=elementid,
+        headers=headers,
     )
-
-    return tag
 
 def server_session(model: Model | None = None, session_id: ID | None = None, url: str = "default",
         relative_urls: bool = False, resources: Literal["default"] | None = "default", headers: dict[str, str] = {}) -> str:
@@ -208,15 +206,13 @@ def server_session(model: Model | None = None, session_id: ID | None = None, url
     headers = dict(headers) if headers else {}
     headers['Bokeh-Session-Id'] = session_id
 
-    tag = AUTOLOAD_REQUEST_TAG.render(
-        src_path  = src_path,
-        app_path  = app_path,
-        elementid = elementid,
-        modelid   = modelid,
-        headers   = headers,
+    return AUTOLOAD_REQUEST_TAG.render(
+        src_path=src_path,
+        app_path=app_path,
+        elementid=elementid,
+        modelid=modelid,
+        headers=headers,
     )
-
-    return tag
 
 #-----------------------------------------------------------------------------
 # Dev API
@@ -251,9 +247,14 @@ def server_html_page_for_session(session: ServerSession, resources: Resources, t
         template_variables = {}
 
     bundle = bundle_for_objs_and_resources(None, resources)
-    html = html_page_for_render_items(bundle, {}, [render_item], title,
-        template=template, template_variables=template_variables)
-    return html
+    return html_page_for_render_items(
+        bundle,
+        {},
+        [render_item],
+        title,
+        template=template,
+        template_variables=template_variables,
+    )
 
 #-----------------------------------------------------------------------------
 # Private API
@@ -291,7 +292,7 @@ def _get_app_path(url: str) -> str:
     '''
     app_path = urlparse(url).path.rstrip("/")
     if not app_path.startswith("/"):
-        app_path = "/" + app_path
+        app_path = f"/{app_path}"
     return app_path
 
 def _process_arguments(arguments: dict[str, str] | None) -> str:
@@ -307,11 +308,11 @@ def _process_arguments(arguments: dict[str, str] | None) -> str:
     '''
     if arguments is None:
         return ""
-    result = ""
-    for key, value in arguments.items():
-        if not key.startswith("bokeh-"):
-            result += f"&{quote_plus(str(key))}={quote_plus(str(value))}"
-    return result
+    return "".join(
+        f"&{quote_plus(str(key))}={quote_plus(str(value))}"
+        for key, value in arguments.items()
+        if not key.startswith("bokeh-")
+    )
 
 def _process_app_path(app_path: str) -> str:
     ''' Return an app path HTML argument to add to a Bokeh server URL.
@@ -322,8 +323,7 @@ def _process_app_path(app_path: str) -> str:
             ignored and an empty string returned.
 
     '''
-    if app_path == "/": return ""
-    return "&bokeh-app-path=" + app_path
+    return "" if app_path == "/" else f"&bokeh-app-path={app_path}"
 
 def _process_relative_urls(relative_urls: bool, url: str) -> str:
     ''' Return an absolute URL HTML argument to add to a Bokeh server URL, if
@@ -340,8 +340,7 @@ def _process_relative_urls(relative_urls: bool, url: str) -> str:
         str
 
     '''
-    if relative_urls: return ""
-    return "&bokeh-absolute-url=" + url
+    return "" if relative_urls else f"&bokeh-absolute-url={url}"
 
 def _process_resources(resources: Literal["default"] | None) -> str:
     ''' Return an argument to suppress normal Bokeh server resources, if requested.
@@ -356,9 +355,7 @@ def _process_resources(resources: Literal["default"] | None) -> str:
     '''
     if resources not in ("default", None):
         raise ValueError("`resources` must be either 'default' or None.")
-    if resources is None:
-        return "&resources=none"
-    return ""
+    return "&resources=none" if resources is None else ""
 
 def _src_path(url: str, elementid: ID) -> str:
     ''' Return a base autoload URL for a given element ID
@@ -374,7 +371,7 @@ def _src_path(url: str, elementid: ID) -> str:
         str
 
     '''
-    return url + "/autoload.js?bokeh-autoload-element=" + elementid
+    return f"{url}/autoload.js?bokeh-autoload-element={elementid}"
 
 #-----------------------------------------------------------------------------
 # Code

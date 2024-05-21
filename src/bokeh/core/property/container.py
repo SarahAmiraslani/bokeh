@@ -95,14 +95,15 @@ class Seq(ContainerProperty[T]):
             return
 
         if self._is_seq(value):
-            invalid = []
-            for item in value:
-                if not self.item_type.is_valid(item):
-                    invalid.append(item)
-            msg = "" if not detail else f"expected an element of {self}, got seq with invalid items {invalid!r}"
+            invalid = [item for item in value if not self.item_type.is_valid(item)]
+            msg = (
+                f"expected an element of {self}, got seq with invalid items {invalid!r}"
+                if detail
+                else ""
+            )
             raise ValueError(msg)
 
-        msg = "" if not detail else f"expected an element of {self}, got {value!r}"
+        msg = f"expected an element of {self}, got {value!r}" if detail else ""
         raise ValueError(msg)
 
     @classmethod
@@ -205,7 +206,7 @@ class Dict(ContainerProperty[Any]):
         if isinstance(value, dict) and all(key_is_valid(key) and value_is_valid(val) for key, val in value.items()):
             return
 
-        msg = "" if not detail else f"expected an element of {self}, got {value!r}"
+        msg = f"expected an element of {self}, got {value!r}" if detail else ""
         raise ValueError(msg)
 
     def wrap(self, value):
@@ -249,9 +250,7 @@ class ColumnData(Dict):
         from ...document.events import ColumnDataChangedEvent, ColumnsStreamedEvent
         if isinstance(hint, ColumnDataChangedEvent):
             return { col: hint.model.data[col] for col in hint.cols }
-        if isinstance(hint, ColumnsStreamedEvent):
-            return hint.data
-        return value
+        return hint.data if isinstance(hint, ColumnsStreamedEvent) else value
 
     def wrap(self, value):
         """ Some property types need to wrap their values in special containers, etc.
@@ -276,11 +275,17 @@ class Tuple(ContainerProperty):
     def validate(self, value: Any, detail: bool = True) -> None:
         super().validate(value, detail)
 
-        if isinstance(value, (tuple, list)) and len(self.type_params) == len(value):
-            if all(type_param.is_valid(item) for type_param, item in zip(self.type_params, value)):
-                return
+        if (
+            isinstance(value, (tuple, list))
+            and len(self.type_params) == len(value)
+            and all(
+                type_param.is_valid(item)
+                for type_param, item in zip(self.type_params, value)
+            )
+        ):
+            return
 
-        msg = "" if not detail else f"expected an element of {self}, got {value!r}"
+        msg = f"expected an element of {self}, got {value!r}" if detail else ""
         raise ValueError(msg)
 
     def transform(self, value):
@@ -314,10 +319,8 @@ class RestrictedDict(Dict):
     def validate(self, value: Any, detail: bool = True) -> None:
         super().validate(value, detail)
 
-        error_keys = self._disallow & value.keys()
-
-        if error_keys:
-            msg = "" if not detail else f"Disallowed keys: {error_keys!r}"
+        if error_keys := self._disallow & value.keys():
+            msg = f"Disallowed keys: {error_keys!r}" if detail else ""
             raise ValueError(msg)
 
 TSeq = TypeVar("TSeq", bound=Seq[Any])
@@ -333,7 +336,7 @@ class NonEmpty(SingleParameterizedProperty[TSeq]):
         super().validate(value, detail)
 
         if not value:
-            msg = "" if not detail else "Expected a non-empty container"
+            msg = "Expected a non-empty container" if detail else ""
             raise ValueError(msg)
 
 #-----------------------------------------------------------------------------

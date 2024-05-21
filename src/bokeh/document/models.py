@@ -175,14 +175,22 @@ class DocumentModelManager:
 
     @property
     def synced_references(self) -> set[Model]:
-        return set(model for model in self._models.values() if model not in self._new_models)
+        return {
+            model
+            for model in self._models.values()
+            if model not in self._new_models
+        }
 
     def flush_synced(self, is_still_new: Callable[[Model], bool] | None = None) -> None:
         ''' Clean up transient state of the document's models. '''
         if is_still_new is None:
             self._new_models.clear()
         else:
-            self._new_models = set(new_model for new_model in self._new_models if is_still_new(new_model))
+            self._new_models = {
+                new_model
+                for new_model in self._new_models
+                if is_still_new(new_model)
+            }
 
     def invalidate(self) -> None:
         ''' Recompute the set of all models, if not currently frozen

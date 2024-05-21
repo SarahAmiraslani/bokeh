@@ -227,7 +227,7 @@ class CustomModel:
 
     @property
     def full_name(self) -> str:
-        name = self.cls.__module__ + "." + self.name
+        name = f"{self.cls.__module__}.{self.name}"
         return name.replace("__main__.", "")
 
     @property
@@ -261,7 +261,7 @@ class CustomModel:
                 impl = TypeScript(impl)
 
         if isinstance(impl, Inline) and impl.file is None:
-            file = f"{self.file + ':' if self.file else ''}{self.name}.ts"
+            file = f"{f'{self.file}:' if self.file else ''}{self.name}.ts"
             impl = impl.__class__(impl.code, file)
 
         return impl
@@ -314,7 +314,7 @@ def bundle_models(models: Sequence[type[HasProps]] | None) -> str | None:
             _bundle_cache[key] = bundle = _bundle_models(custom_models)
         except CompilationError as error:
             print("Compilation failed:", file=sys.stderr)
-            print(str(error), file=sys.stderr)
+            print(error, file=sys.stderr)
             sys.exit(1)
     return bundle
 
@@ -467,7 +467,7 @@ _CACHING_IMPLEMENTATION = _model_cache_no_op
 
 def _get_custom_models(models: Sequence[type[HasProps]] | None) -> dict[str, CustomModel] | None:
     """Returns CustomModels for models with a custom `__implementation__`"""
-    custom_models: dict[str, CustomModel] = dict()
+    custom_models: dict[str, CustomModel] = {}
 
     for cls in models or HasProps.model_class_reverse_map.values():
         impl = getattr(cls, "__implementation__", None)
@@ -489,7 +489,10 @@ def _compile_models(custom_models: dict[str, CustomModel]) -> dict[str, AttrDict
 
     if dependencies:
         dependencies = sorted(dependencies, key=lambda name_version: name_version[0])
-        _run_npmjs(["install", "--no-progress"] + [ name + "@" + version for (name, version) in dependencies ])
+        _run_npmjs(
+            ["install", "--no-progress"]
+            + [f"{name}@{version}" for (name, version) in dependencies]
+        )
 
     for model in ordered_models:
         impl = model.implementation
@@ -513,8 +516,7 @@ def _bundle_models(custom_models: dict[str, CustomModel]) -> str:
 
     for path in lib_dir.rglob("*.d.ts"):
         s = str(path.relative_to(lib_dir))
-        if s.endswith(".d.ts"):
-            s = s[:-5] # TODO: removesuffix() (Py 3.9+)
+        s = s.removesuffix(".d.ts")
         s = s.replace(os.path.sep, "/")
         known_modules.add(s)
 
@@ -532,14 +534,14 @@ def _bundle_models(custom_models: dict[str, CustomModel]) -> str:
                 if module.endswith(exts):
                     path = mkpath(module)
                     if not exists(path):
-                        raise RuntimeError("no such module: %s" % module)
+                        raise RuntimeError(f"no such module: {module}")
                 else:
                     for ext in exts:
                         path = mkpath(module, ext)
                         if exists(path):
                             break
                     else:
-                        raise RuntimeError("no such module: %s" % module)
+                        raise RuntimeError(f"no such module: {module}")
 
                 impl = FromFile(path)
                 compiled = nodejs_compile(impl.code, lang=impl.lang, file=impl.file)
@@ -562,7 +564,7 @@ def _bundle_models(custom_models: dict[str, CustomModel]) -> str:
             else:
                 index = module + ("" if module.endswith("/") else "/") + "index"
                 if index not in known_modules:
-                    raise RuntimeError("no such module: %s" % module)
+                    raise RuntimeError(f"no such module: {module}")
 
         return resolved
 
@@ -585,8 +587,8 @@ def _bundle_models(custom_models: dict[str, CustomModel]) -> str:
     bare_modules = []
     for i, (module, code, deps) in enumerate(modules):
         for name, ref in deps.items():
-            code = code.replace("""require("%s")""" % name, """require("%s")""" % ref)
-            code = code.replace("""require('%s')""" % name, """require('%s')""" % ref)
+            code = code.replace(f"""require("{name}")""", f"""require("{ref}")""")
+            code = code.replace(f"""require('{name}')""", f"""require('{ref}')""")
         bare_modules.append((module, code))
 
     sep = ",\n"
